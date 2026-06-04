@@ -21,16 +21,16 @@ public class Inventory : MonoBehaviour
     private Transform inventoryAnchor;
 
     [SerializeField]
-    private float firstCircleInventoryRadius;
+    public float firstCircleInventoryRadius;
     [SerializeField]
-    private float nextCircleRadiusToAdd;
+    public float nextCircleRadiusToAdd;
 
     [SerializeField]
-    private int firstCircleSlotCount;
+    public int firstCircleSlotCount;
     [SerializeField]
-    private int nextCircleSlotsToAdd;
+    public int nextCircleSlotsToAdd;
 
-    private bool isInventoryOpened = false;
+    public bool isInventoryOpened { get; private set; }
 
     [Header("Input info")]
     [SerializeField]
@@ -39,8 +39,8 @@ public class Inventory : MonoBehaviour
     [Header("Animation info")]
     [SerializeField]
     private float animationTime;
-    private Dictionary<Transform, Transform> inventory = new();
-    private int runningAnimations = 0;
+    private List<InventorySlot> slots = new();
+    public int runningAnimations { get; private set; }
 
     [Header("Flags")]
     [SerializeField]
@@ -50,41 +50,33 @@ public class Inventory : MonoBehaviour
     [SerializeField]
     private bool creative = false;
 
-    private bool IsItem(Transform key) => !inventory[key] || !inventory[key].GetComponent<Item>();
-
     private void Awake()
     {
         grabItem.action.performed += UseInventory;
 
-        for (int i = 0; i < transform.childCount; i++)
-            inventory.Add(transform.GetChild(i), transform.GetChild(i).GetComponent<XRSocketInteractor>()?.attachTransform);
+        int i = 0;
+
+        foreach(InventorySlot slot in GetComponentsInChildren<InventorySlot>())
+        {
+            slots.Add(slot);
+            slot.InventoryIndex = i;
+
+            i++;
+        }
 
         SetSlotsActive(false);
 
-        if (IsItem(inventory.Last().Key)) AddSlot();
+        if (slots.Last().hasItem) AddSlot();
     }
 
-    public void AddItem(SelectEnterEventArgs args)
+    public void AddItem(int slotIndex)
     {
-        inventory[args.interactorObject.transform] = args.interactableObject.transform;
-
-        if (canAddSlots && inventory.Keys.Last() == args.interactorObject.transform)
+        if (canAddSlots && slotIndex == slots.Count - 1 && slots.Last().hasItem)
             AddSlot();
     }
 
-    private void ScaleItem(Transform item)
+    public void RemoveItem()
     {
-        Renderer slot = slotPrefab.GetComponent<Renderer>();
-
-        //slot.bound
-    }
-
-    public void TakeItem(SelectExitEventArgs args)
-    {
-        if(!isInventoryOpened || runningAnimations > 0) return;
-
-        inventory[args.interactorObject.transform] = null;
-
         if(canClearSlots)
             ClearSlots();
     }
@@ -92,41 +84,31 @@ public class Inventory : MonoBehaviour
     public void AddSlot()
     {
         var newSlot = Instantiate(slotPrefab, inventoryPrefab.transform);
+        int newSlotIndex = slots.Count;
+
         newSlot.transform.position = Vector3.zero;
+        slots.Add(newSlot.GetComponent<InventorySlot>());
 
-        int slotIndex = inventory.Count;
-        int slotCountInCircle = firstCircleSlotCount;
-        float radius = firstCircleInventoryRadius;
+        slots[newSlotIndex].InventoryIndex = newSlotIndex;
 
-        while (slotIndex > slotCountInCircle - 1)
-        {
-            slotIndex -= slotCountInCircle;
-            slotCountInCircle += nextCircleSlotsToAdd;
-            radius += nextCircleRadiusToAdd;
-        }
-
-        newSlot.transform.localPosition = GetCircularPosition(radius, slotIndex, slotCountInCircle);
-        
-        inventory.Add(newSlot.transform, null);
-
-        var interactor = newSlot.GetComponent<XRSocketInteractor>();
-        interactor.selectEntered.AddListener(AddItem);
-        interactor.selectExited.AddListener(TakeItem);
+        newSlot.transform.localPosition = slots[newSlotIndex].inventoryPosition;
     }
 
     public void ClearSlots()
     {
-        var keys = inventory.Keys.ToList();
+        int toRemoveElems = 0;
 
-        for(int i = keys.Count - 1; i > 1; i--)
+        for(int i = slots.Count - 1; i > 1; i--)
         {
-            if (IsItem(keys[i - 1]))
+            if (!slots[i - 1].hasItem)
             {
-                inventory.Remove(keys[i]);
-                Destroy(keys[i].gameObject);
+                toRemoveElems++;
+                Destroy(slots[i].gameObject);
             }
             else break;
         }
+
+        slots.RemoveRange(slots.Count - toRemoveElems, toRemoveElems);
     }
 
     private void UseInventory(InputAction.CallbackContext obj)
@@ -146,10 +128,8 @@ public class Inventory : MonoBehaviour
     private void ShowInventory()
     {
         SetSlotsActive(true);
-        SetItemsActive(true);
 
         inventoryPrefab.transform.position = inventoryAnchor.position;
-        SetItemsPositions(inventoryAnchor.position);
 
         int i = 0;
         int slotCount = firstCircleSlotCount;
@@ -157,16 +137,16 @@ public class Inventory : MonoBehaviour
 
         inventoryPrefab.transform.rotation = Quaternion.Euler(.0f, inventoryAnchor.eulerAngles.y, .0f);
 
-        foreach (Transform t in inventory.Keys)
+        foreach (InventorySlot slot in slots)
         {
-            Transform captured = t;
+            Transform captured = slot.transform;
 
-            bool isLast = inventory.Keys.Last() == t;
+            bool isLast = slots.Last() == slot;
 
             StartCoroutine(
-                    InventoryAnim(captured, GetCircularPosition(inventoryRadius, i++, slotCount), () =>
+                    InventoryAnim(captured, slot.inventoryPosition, () =>
                     {
-                        t.gameObject.GetComponent<XRSocketInteractor>().socketActive = true;
+                        slot.interactor.socketActive = true;
 
                         if (isLast)
                         {
@@ -190,17 +170,15 @@ public class Inventory : MonoBehaviour
         isInventoryOpened = false;
         SetItemsInteractability(false);
 
-        foreach (Transform t in inventory.Keys)
+        foreach (InventorySlot slot in slots)
         {
-            Transform captured = t;
+            Transform captured = slot.transform;
 
-            t.gameObject.GetComponent<XRSocketInteractor>().socketActive = false;
+            slot.interactor.socketActive = false;
 
             StartCoroutine(
                 InventoryAnim(captured, captured.parent.InverseTransformPoint(inventoryAnchor.position), () =>
                 {
-                    if (inventory[captured]) inventory[captured].gameObject.SetActive(false);
-                        
                     captured.gameObject.SetActive(false);
                     captured.localPosition = Vector3.zero;
                 })
@@ -210,51 +188,17 @@ public class Inventory : MonoBehaviour
 
     private void SetSlotsActive(bool state)
     {
-        foreach(Transform t in inventory.Keys)
+        foreach(InventorySlot slot in slots)
         {
-            t.gameObject.SetActive(state);
+            slot.gameObject.SetActive(state);
         }
     }
-
-    private void SetItemsPositions(Vector3 pos)
-    {
-        foreach (Transform t in inventory.Keys)
-        {
-            t.position = pos;
-        }
-    }
-
     private void SetItemsInteractability(bool state)
     {
-        foreach (Transform t in inventory.Keys)
+        foreach (InventorySlot slot in slots)
         {
-            if(inventory[t])
-            {
-                var interactable = inventory[t].gameObject.GetComponent<XRGrabInteractable>();
-                var rb = inventory[t].gameObject.GetComponent<Rigidbody>();
-                
-                if (interactable) interactable.enabled = state;
-                if(rb) rb.useGravity = state;
-            }
+            slot.ItemIsInteractable = state;
         }
-    }
-
-    private void SetItemsActive(bool state)
-    {
-        foreach( Transform t in inventory.Keys)
-        {
-            if(inventory[t]) inventory[t].gameObject.SetActive(state);
-        }
-    }
-
-    private Vector3 GetCircularPosition(float radius, int index, int slotCount)
-    {
-        float angle = (2 * Mathf.PI / slotCount) * index;
-
-        float x = radius * Mathf.Cos(angle);
-        float y = radius * Mathf.Sin(angle);
-
-        return new Vector3(x, y, 0);
     }
 
     IEnumerator InventoryAnim(Transform toAnim, Vector3 to, Action callback = null)
@@ -269,7 +213,6 @@ public class Inventory : MonoBehaviour
             float percent = (Time.time - timeStamp) / animationTime;
 
             toAnim.localPosition = Vector3.Lerp(startPos, to, percent);
-            if(inventory.TryGetValue(toAnim, out var item) && item) item.position = toAnim.position;
 
             yield return null;
         }
