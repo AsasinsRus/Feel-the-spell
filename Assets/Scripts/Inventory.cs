@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +8,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
-public class InventoryVisual : MonoBehaviour
+public class Inventory : MonoBehaviour
 {
     [Header("Slot info")]
     [SerializeField]
@@ -28,11 +26,11 @@ public class InventoryVisual : MonoBehaviour
     private float nextCircleRadiusToAdd;
 
     [SerializeField]
-    private int firstCirleSlotCount;
+    private int firstCircleSlotCount;
     [SerializeField]
-    private int nextCirleSlotsToAdd;
+    private int nextCircleSlotsToAdd;
 
-    private bool isInventoryOpened;
+    private bool isInventoryOpened = false;
 
     [Header("Input info")]
     [SerializeField]
@@ -42,15 +40,17 @@ public class InventoryVisual : MonoBehaviour
     [SerializeField]
     private float animationTime;
     private Dictionary<Transform, Transform> inventory = new();
-    private bool isAnimationEnded = true;
+    private int runningAnimations = 0;
 
     [Header("Flags")]
     [SerializeField]
-    public bool canClearSlots = true;
+    private bool canClearSlots = true;
     [SerializeField]
-    public bool canAddSlots = true;
+    private bool canAddSlots = true;
     [SerializeField]
-    public bool creative = false;
+    private bool creative = false;
+
+    private bool IsItem(Transform key) => !inventory[key] || !inventory[key].GetComponent<Item>();
 
     private void Awake()
     {
@@ -60,21 +60,28 @@ public class InventoryVisual : MonoBehaviour
             inventory.Add(transform.GetChild(i), transform.GetChild(i).GetComponent<XRSocketInteractor>()?.attachTransform);
 
         SetSlotsActive(false);
+
+        if (IsItem(inventory.Last().Key)) AddSlot();
     }
 
     public void AddItem(SelectEnterEventArgs args)
     {
         inventory[args.interactorObject.transform] = args.interactableObject.transform;
 
-        Debug.Log(inventory[args.interactorObject.transform]);
-
         if (canAddSlots && inventory.Keys.Last() == args.interactorObject.transform)
             AddSlot();
     }
 
+    private void ScaleItem(Transform item)
+    {
+        Renderer slot = slotPrefab.GetComponent<Renderer>();
+
+        //slot.bound
+    }
+
     public void TakeItem(SelectExitEventArgs args)
     {
-        if(!isInventoryOpened || !isAnimationEnded) return;
+        if(!isInventoryOpened || runningAnimations > 0) return;
 
         inventory[args.interactorObject.transform] = null;
 
@@ -88,13 +95,13 @@ public class InventoryVisual : MonoBehaviour
         newSlot.transform.position = Vector3.zero;
 
         int slotIndex = inventory.Count;
-        int slotCountInCircle = firstCirleSlotCount;
+        int slotCountInCircle = firstCircleSlotCount;
         float radius = firstCircleInventoryRadius;
 
         while (slotIndex > slotCountInCircle - 1)
         {
             slotIndex -= slotCountInCircle;
-            slotCountInCircle += nextCirleSlotsToAdd;
+            slotCountInCircle += nextCircleSlotsToAdd;
             radius += nextCircleRadiusToAdd;
         }
 
@@ -113,7 +120,7 @@ public class InventoryVisual : MonoBehaviour
 
         for(int i = keys.Count - 1; i > 1; i--)
         {
-            if (!inventory[keys[i - 1]] || !inventory[keys[i - 1]].GetComponent<Item>())
+            if (IsItem(keys[i - 1]))
             {
                 inventory.Remove(keys[i]);
                 Destroy(keys[i].gameObject);
@@ -124,7 +131,7 @@ public class InventoryVisual : MonoBehaviour
 
     private void UseInventory(InputAction.CallbackContext obj)
     {
-        if (!isAnimationEnded) return;
+        if (runningAnimations > 0) return;
 
         if (!isInventoryOpened)
         {
@@ -145,25 +152,34 @@ public class InventoryVisual : MonoBehaviour
         SetItemsPositions(inventoryAnchor.position);
 
         int i = 0;
-        int slotCount = firstCirleSlotCount;
+        int slotCount = firstCircleSlotCount;
         float inventoryRadius = firstCircleInventoryRadius;
 
         inventoryPrefab.transform.rotation = Quaternion.Euler(.0f, inventoryAnchor.eulerAngles.y, .0f);
 
-        foreach(Transform t in inventory.Keys.ToList())
+        foreach (Transform t in inventory.Keys)
         {
+            Transform captured = t;
+
+            bool isLast = inventory.Keys.Last() == t;
+
             StartCoroutine(
-                    InventoryAnim(t, GetCircularPosition(inventoryRadius, i++, slotCount), () =>
+                    InventoryAnim(captured, GetCircularPosition(inventoryRadius, i++, slotCount), () =>
                     {
-                        SetItemsInteractability(true);
-                        isInventoryOpened = true;
+                        t.gameObject.GetComponent<XRSocketInteractor>().socketActive = true;
+
+                        if (isLast)
+                        {
+                            SetItemsInteractability(true);
+                            isInventoryOpened = true;
+                        }
                     })
                 );
 
             if (i >= slotCount)
             {
                 i = 0;
-                slotCount += nextCirleSlotsToAdd;
+                slotCount += nextCircleSlotsToAdd;
                 inventoryRadius += nextCircleRadiusToAdd;
             }
         }
@@ -171,25 +187,30 @@ public class InventoryVisual : MonoBehaviour
 
     private void HideInventory()
     {
-        foreach (Transform t in inventory.Keys.ToList())
-        {
-            StartCoroutine(
-                    InventoryAnim(t, t.parent.InverseTransformPoint(inventoryAnchor.position), () =>
-                    {
-                        if (inventory[t]) inventory[t].gameObject.SetActive(false);
-                        t.gameObject.SetActive(false);
-                        isInventoryOpened = false;
-                        t.localPosition = Vector3.zero;
-                    })
-                );
-        }
-
+        isInventoryOpened = false;
         SetItemsInteractability(false);
+
+        foreach (Transform t in inventory.Keys)
+        {
+            Transform captured = t;
+
+            t.gameObject.GetComponent<XRSocketInteractor>().socketActive = false;
+
+            StartCoroutine(
+                InventoryAnim(captured, captured.parent.InverseTransformPoint(inventoryAnchor.position), () =>
+                {
+                    if (inventory[captured]) inventory[captured].gameObject.SetActive(false);
+                        
+                    captured.gameObject.SetActive(false);
+                    captured.localPosition = Vector3.zero;
+                })
+            );
+        }
     }
 
     private void SetSlotsActive(bool state)
     {
-        foreach(Transform t in inventory.Keys.ToList())
+        foreach(Transform t in inventory.Keys)
         {
             t.gameObject.SetActive(state);
         }
@@ -197,7 +218,7 @@ public class InventoryVisual : MonoBehaviour
 
     private void SetItemsPositions(Vector3 pos)
     {
-        foreach (Transform t in inventory.Keys.ToList())
+        foreach (Transform t in inventory.Keys)
         {
             t.position = pos;
         }
@@ -205,7 +226,7 @@ public class InventoryVisual : MonoBehaviour
 
     private void SetItemsInteractability(bool state)
     {
-        foreach (Transform t in inventory.Keys.ToList())
+        foreach (Transform t in inventory.Keys)
         {
             if(inventory[t])
             {
@@ -220,7 +241,7 @@ public class InventoryVisual : MonoBehaviour
 
     private void SetItemsActive(bool state)
     {
-        foreach( Transform t in inventory.Keys.ToList())
+        foreach( Transform t in inventory.Keys)
         {
             if(inventory[t]) inventory[t].gameObject.SetActive(state);
         }
@@ -236,27 +257,33 @@ public class InventoryVisual : MonoBehaviour
         return new Vector3(x, y, 0);
     }
 
-    IEnumerator InventoryAnim(Transform toAnim, Vector3 to, Action afterAction = null, Action inAction = null)
+    IEnumerator InventoryAnim(Transform toAnim, Vector3 to, Action callback = null)
     {
         Vector3 startPos = toAnim.localPosition;
         float timeStamp = Time.time;
 
-        isAnimationEnded = false;
+        runningAnimations++;
 
         while (Time.time - timeStamp < animationTime)
         {
             float percent = (Time.time - timeStamp) / animationTime;
 
             toAnim.localPosition = Vector3.Lerp(startPos, to, percent);
-            if(inventory[toAnim]) inventory[toAnim].position = toAnim.position;
+            if(inventory.TryGetValue(toAnim, out var item) && item) item.position = toAnim.position;
 
             yield return null;
         }
 
         toAnim.localPosition = to;
-        afterAction?.Invoke();
+        callback?.Invoke();
 
-        isAnimationEnded = true;
+        runningAnimations--;
+
+        if(runningAnimations <= 0) runningAnimations = 0;
     }
-    
+
+    private void OnDestroy()
+    {
+        grabItem.action.performed -= UseInventory;
+    }
 }
