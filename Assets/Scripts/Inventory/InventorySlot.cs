@@ -22,29 +22,30 @@ public class InventorySlot : MonoBehaviour
     public Vector3 itemScaling;
 
     public bool infinite;
-    
+
     /// <summary>
     /// Item that this slot has.
     /// </summary>
-    public GameObject Item { 
-        get => item; 
-        private set 
-        { 
-            if(value == null)
+    public GameObject Item
+    {
+        get => item;
+        private set
+        {
+            if (value == null)
                 hasItem = false;
             else hasItem = true;
 
             item = value;
-        } 
+        }
     }
     private bool itemIsInteractable;
     /// <summary>
     /// Shows and changes if the item can be picked up.
     /// </summary>
-    public bool ItemIsInteractable 
-    { 
+    public bool ItemIsInteractable
+    {
         get => itemIsInteractable;
-        set 
+        set
         {
             SetItemInteractability(value);
 
@@ -65,18 +66,19 @@ public class InventorySlot : MonoBehaviour
 
     [SerializeField]
     private int inventoryIndex;
-    
+
     /// <summary>
     /// Index in inventory list.
     /// </summary>
-    public int InventoryIndex { 
-        get => inventoryIndex; 
-        set 
+    public int InventoryIndex
+    {
+        get => inventoryIndex;
+        set
         {
             inventoryIndex = value;
 
             inventoryPosition = FindInventoryPos(value);
-        } 
+        }
     }
 
     public XRSocketInteractor interactor { get; private set; }
@@ -94,11 +96,14 @@ public class InventorySlot : MonoBehaviour
 
         interactor.selectEntered.AddListener(AddItem);
         interactor.selectExited.AddListener(TakeItem);
+
+        if (interactor.attachTransform != null)
+            AddItem(interactor.attachTransform.gameObject);
     }
 
     private void Update()
     {
-        if(item != null && !itemIsInteractable)
+        if (item != null && !itemIsInteractable)
         {
             item.transform.position = transform.position;
             item.transform.rotation = itemRotation;
@@ -123,6 +128,9 @@ public class InventorySlot : MonoBehaviour
     {
         Item = item;
 
+        itemScaling = item.transform.localScale;
+        itemRotation = item.transform.rotation;
+
         if (interactor.socketScaleMode != SocketScaleMode.StretchedToFitSize)
             ScaleItem(Item);
 
@@ -136,7 +144,7 @@ public class InventorySlot : MonoBehaviour
 
         var itemRenderer = item.GetComponentInChildren<Renderer>();
 
-        if(itemRenderer == null) return;
+        if (itemRenderer == null) return;
 
         float maxItemSize = Mathf.Max(
             itemRenderer.bounds.size.x,
@@ -155,7 +163,7 @@ public class InventorySlot : MonoBehaviour
     {
         interactor.socketScaleMode = SocketScaleMode.None;
 
-        if(originalItemScale != null)
+        if (originalItemScale != null)
             item.localScale = originalItemScale;
         originalItemScale = default;
     }
@@ -182,7 +190,7 @@ public class InventorySlot : MonoBehaviour
         {
             Item = null;
             inventory.RemoveItem();
-        }        
+        }
     }
 
     private IEnumerator RegenarateItem(Transform takenItem)
@@ -241,7 +249,7 @@ public class InventorySlot : MonoBehaviour
 
     private void SetItemInteractability(bool state)
     {
-        if(item ==  null) return;
+        if (item == null) return;
 
         itemRotation = Item.transform.rotation;
         itemScaling = Item.transform.localScale;

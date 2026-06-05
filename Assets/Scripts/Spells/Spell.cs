@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -11,10 +13,14 @@ public class Spell : MonoBehaviour
     public SpellSO spellSO;
 
     private Rigidbody rb;
-    private XRGrabInteractable interactable;
+    protected XRGrabInteractable interactable;
 
     [SerializeField]
     private float hitCollisionRadius = 1;
+
+    [SerializeField]
+    private float forceMultiplier = 2.5f;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -50,6 +56,15 @@ public class Spell : MonoBehaviour
     {
         rb.useGravity = true;
         rb.isKinematic = false;
+
+        StartCoroutine(ApplyMultpiplier());
+    }
+
+    private IEnumerator ApplyMultpiplier()
+    {
+        yield return null;
+
+        rb.linearVelocity *= forceMultiplier;
     }
 
     private void OnSelectEnter(SelectEnterEventArgs args)
@@ -64,5 +79,11 @@ public class Spell : MonoBehaviour
 
         OnHit = null;
         OnPickUp = null;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, hitCollisionRadius);
     }
 }
