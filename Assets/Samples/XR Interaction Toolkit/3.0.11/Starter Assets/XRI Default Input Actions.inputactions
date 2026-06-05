@@ -1295,6 +1295,17 @@
                 },
                 {
                     "name": "",
+                    "id": "2e7e3f43-7546-4581-a21c-4c5b75841e4f",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Secondary Button",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "f8a5f79c-5455-43ff-838a-694cdb4e7ff5",
                     "path": "<XRController>{LeftHand}/{PrimaryButton}",
                     "interactions": "",

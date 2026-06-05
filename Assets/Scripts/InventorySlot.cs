@@ -1,19 +1,31 @@
-using Unity.VisualScripting;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
+/// <summary>
+/// Describes one inventory slot.
+/// </summary>
 public class InventorySlot : MonoBehaviour
 {
-
+    /// <summary>
+    /// Shows if a slot has an item.
+    /// </summary>
     [SerializeField]
     public bool hasItem { get; private set; }
 
     private GameObject item;
     private Vector3 originalItemScale;
     private Quaternion itemRotation;
-    private Vector3 itemScaling;
+    [HideInInspector]
+    public Vector3 itemScaling;
+
+    public bool infinite;
+    
+    /// <summary>
+    /// Item that this slot has.
+    /// </summary>
     public GameObject Item { 
         get => item; 
         private set 
@@ -26,6 +38,9 @@ public class InventorySlot : MonoBehaviour
         } 
     }
     private bool itemIsInteractable;
+    /// <summary>
+    /// Shows and changes if the item can be picked up.
+    /// </summary>
     public bool ItemIsInteractable 
     { 
         get => itemIsInteractable;
@@ -37,11 +52,23 @@ public class InventorySlot : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Inventory that manges this slot.
+    /// </summary>
     public Inventory inventory;
+
+    /// <summary>
+    /// Position in inventory where the slot will be placed after opening an <see cref="inventory"/>.
+    /// </summary>
     public Vector3 inventoryPosition { get; private set; }
+
 
     [SerializeField]
     private int inventoryIndex;
+    
+    /// <summary>
+    /// Index in inventory list.
+    /// </summary>
     public int InventoryIndex { 
         get => inventoryIndex; 
         set 
@@ -53,6 +80,9 @@ public class InventorySlot : MonoBehaviour
     }
 
     public XRSocketInteractor interactor { get; private set; }
+
+    [SerializeField]
+    private float distanceToGenarateItem = 0.4f;
 
     private void Awake()
     {
@@ -76,11 +106,24 @@ public class InventorySlot : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Adds an item to the slot and slot to an <seealso cref="inventory"/>.
+    /// </summary>
+    /// <param name="args"></param>
     public void AddItem(SelectEnterEventArgs args)
     {
-        Item = args.interactableObject.transform.gameObject;
+        AddItem(args.interactableObject.transform.gameObject);
+    }
 
-        if(interactor.socketScaleMode != SocketScaleMode.StretchedToFitSize)
+    /// <summary>
+    /// Adds an item to the slot and slot to an <seealso cref="inventory"/>.
+    /// </summary>
+    /// <param name="args"></param>
+    public void AddItem(GameObject item)
+    {
+        Item = item;
+
+        if (interactor.socketScaleMode != SocketScaleMode.StretchedToFitSize)
             ScaleItem(Item);
 
         inventory.AddItem(InventoryIndex);
@@ -117,6 +160,10 @@ public class InventorySlot : MonoBehaviour
         originalItemScale = default;
     }
 
+    /// <summary>
+    /// Deletes item from <seealso cref="inventory"/> and a slot.
+    /// </summary>
+    /// <param name="args"></param>
     public void TakeItem(SelectExitEventArgs args)
     {
         if (!inventory.isInventoryOpened || inventory.runningAnimations > 0) return;
@@ -124,11 +171,33 @@ public class InventorySlot : MonoBehaviour
         if (Item == null) return;
 
         UnscaleItem(Item.transform);
-        Item = null;
 
-        inventory.RemoveItem();
+        if (infinite)
+        {
+            StartCoroutine(RegenarateItem(Item.transform));
+        }
+        else
+        {
+            Item = null;
+            inventory.RemoveItem();
+        }        
     }
 
+    private IEnumerator RegenarateItem(Transform takenItem)
+    {
+        while (takenItem != null && Vector3.Distance(takenItem.transform.position, transform.position) < distanceToGenarateItem)
+        {
+            yield return null;
+        }
+
+        Item.GetComponent<Rigidbody>().useGravity = true;
+        Item = Instantiate(item, transform.position, transform.rotation);
+    }
+
+    /// <summary>
+    /// Finds right local position in inventory.
+    /// </summary>
+    /// <param name="slotIndex">Depending of this value will the position be found</param>
     private Vector3 FindInventoryPos(int slotIndex)
     {
         int slotCountInCircle = inventory.firstCircleSlotCount;
@@ -144,6 +213,13 @@ public class InventorySlot : MonoBehaviour
         return GetCircularPosition(radius, slotIndex, slotCountInCircle);
     }
 
+    /// <summary>
+    /// Finds right local position in inventory.
+    /// </summary>
+    /// <param name="radius"></param>
+    /// <param name="index"></param>
+    /// <param name="slotCount"></param>
+    /// <returns></returns>
     private Vector3 GetCircularPosition(float radius, int index, int slotCount)
     {
         float angle = (2 * Mathf.PI / slotCount) * index;

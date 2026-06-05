@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1dcf2a7c105704b4fa966018a3685da5, type: 3}
-  m_Name: Water
+  m_Name: Lightning
   m_EditorClassIdentifier: 
-  name: Waterball
-  description: water
-  prefab: {fileID: 0}
+  itemName: Litghtning
+  description: Litghtning
+  prefab: {fileID: 912369389594068030, guid: e9d86d1388f41fe4b85823c403d78479, type: 3}
