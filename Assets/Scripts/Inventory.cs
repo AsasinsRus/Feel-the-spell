@@ -74,7 +74,7 @@ public class Inventory : MonoBehaviour
     [SerializeField]
     private bool creative = false;
 
-    private void Awake()
+    private void Start()
     {
         grabItem.action.performed += UseInventory;
 
@@ -90,9 +90,9 @@ public class Inventory : MonoBehaviour
 
         if (creative) SetCreativeActive();
 
-        SetSlotsActive(false);
-
         if (slots.Last().hasItem && !creative) AddSlot();
+
+        SetSlotsActive(false);
     }
 
     /// <summary>

@@ -94,6 +94,9 @@ public class InventorySlot : MonoBehaviour
 
         interactor.selectEntered.AddListener(AddItem);
         interactor.selectExited.AddListener(TakeItem);
+
+        if(interactor.attachTransform != null)
+            AddItem(interactor.attachTransform.gameObject);
     }
 
     private void Update()
@@ -122,6 +125,9 @@ public class InventorySlot : MonoBehaviour
     public void AddItem(GameObject item)
     {
         Item = item;
+
+        itemScaling = item.transform.localScale;
+        itemRotation = item.transform.rotation;
 
         if (interactor.socketScaleMode != SocketScaleMode.StretchedToFitSize)
             ScaleItem(Item);
@@ -232,7 +238,7 @@ public class InventorySlot : MonoBehaviour
 
     private void SetItemInteractability(bool state)
     {
-        if(item ==  null) return;
+        if(item == null) return;
 
         itemRotation = Item.transform.rotation;
         itemScaling = Item.transform.localScale;
