@@ -174,7 +174,9 @@ public class InventorySlot : MonoBehaviour
 
         if (infinite)
         {
-            StartCoroutine(RegenarateItem(Item.transform));
+            //StartCoroutine(RegenarateItem(Item.transform));
+
+            RegenarateItem(Item);
         }
         else
         {
@@ -192,6 +194,13 @@ public class InventorySlot : MonoBehaviour
 
         Item.GetComponent<Rigidbody>().useGravity = true;
         Item = Instantiate(item, transform.position, transform.rotation);
+    }
+
+    private void RegenarateItem(GameObject takenItem)
+    {
+        var newItem = Instantiate(takenItem, transform.position, transform.rotation);
+
+        Physics.IgnoreCollision(newItem.GetComponent<Collider>(), takenItem.GetComponent<Collider>());
     }
 
     /// <summary>

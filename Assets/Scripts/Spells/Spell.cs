@@ -12,6 +12,9 @@ public class Spell : MonoBehaviour
 
     private Rigidbody rb;
     private XRGrabInteractable interactable;
+
+    [SerializeField]
+    private float hitCollisionRadius = 1;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -27,6 +30,18 @@ public class Spell : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         OnHit?.Invoke();
+
+        var collisions = Physics.OverlapSphere(transform.position, hitCollisionRadius);
+
+        foreach(var _collision in collisions)
+        {
+            if (_collision.gameObject.TryGetComponent(typeof(IDamagable), out var component))
+            {
+                Debug.Log(_collision.gameObject.name + " was damaged by " + spellSO.damage);
+
+                (component as IDamagable).Damage(spellSO.damage);
+            }
+        }
 
         Destroy(gameObject);
     }
