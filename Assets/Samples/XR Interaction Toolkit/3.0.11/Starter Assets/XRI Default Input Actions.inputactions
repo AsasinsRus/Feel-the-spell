@@ -962,7 +962,7 @@
                     "name": "Scale Toggle",
                     "type": "Button",
                     "id": "80ed7d74-56de-473c-bf76-da3bdd16b562",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -1296,7 +1296,7 @@
                 {
                     "name": "",
                     "id": "2e7e3f43-7546-4581-a21c-4c5b75841e4f",
-                    "path": "<Keyboard>/space",
+                    "path": "<Keyboard>/o",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
