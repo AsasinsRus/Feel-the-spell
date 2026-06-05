@@ -220,6 +220,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spellSO: {fileID: 11400000, guid: 7590ab58d3794224b9c1c3b83b07cad2, type: 2}
+  hitCollisionRadius: 1.5
+  forceMultiplier: 2.5
   afterHit: {fileID: 1582275357731197809, guid: 5334360cd0cfad84bbf6855beaf10de4, type: 3}
 --- !u!1001 &4239206679321044403
 PrefabInstance:

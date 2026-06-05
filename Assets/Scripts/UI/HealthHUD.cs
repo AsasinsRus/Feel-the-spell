@@ -12,9 +12,6 @@ public class HealthHUD : MonoBehaviour
     [SerializeField]
     private Canvas healthCanvas;
 
-    [SerializeField]
-    private Transform observer;
-
     private float originalBarWidth;
 
     private void Start()
@@ -31,7 +28,10 @@ public class HealthHUD : MonoBehaviour
 
     private void OnHealthChange()
     {
-        float healthRatio = health.currentHealth / health.maxHealth;
+        float healthRatio = (float)health.currentHealth / (float)health.maxHealth;
+
+        Debug.Log("(UI) Health ratio: " + healthRatio);
+        Debug.Log("(UI) Original bar width: " + originalBarWidth);
 
         healthBarRectTransform.sizeDelta = new Vector2(healthRatio * originalBarWidth, healthBarRectTransform.sizeDelta.y);
     }
