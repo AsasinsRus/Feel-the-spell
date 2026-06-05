@@ -192,4 +192,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d989dc827bf931c4195afd186032c374, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemScaling: {x: 0, y: 0, z: 0}
+  infinite: 0
   inventory: {fileID: 0}
+  inventoryIndex: 0
+  distanceToGenarateItem: 0.2
+  exitCollider: {fileID: 0}
