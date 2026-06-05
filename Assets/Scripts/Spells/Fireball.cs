@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Fireball : Spell
@@ -12,6 +13,8 @@ public class Fireball : Spell
 
     private void onHit()
     {
-        Destroy(Instantiate(afterHit, transform.position, afterHit.transform.rotation), 5);
+        var fireOnGround = Instantiate(afterHit, transform.position, afterHit.transform.rotation);
+        
+        fireOnGround.GetComponent<DestroyAnim>().Destroy();
     }
 }

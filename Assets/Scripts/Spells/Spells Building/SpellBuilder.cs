@@ -25,8 +25,15 @@ public class SpellBuilder : MonoBehaviour
         {
             if(HasAllComponents(spellSurface, spellSO))
             {
+                Debug.Log("Creted " + spellSO.spellName);
+
+                if(createdSpell)
+                    Destroy(createdSpell);
+
                 createdSpell = Instantiate(spellSO.prefab, spellSurface.spellSpawnpoint.position, spellSurface.spellSpawnpoint.rotation);
                 createdSpell.GetComponent<Spell>().OnPickUp += OnPickUp;
+
+                return true;
             }
             else
             {
@@ -80,7 +87,6 @@ public class SpellBuilder : MonoBehaviour
 
         foreach (Item item in spellSurface.itemOnDesk)
         {
-            
             Destroy(item.gameObject);
         }
 
