@@ -74,7 +74,7 @@ public class Inventory : MonoBehaviour
     [SerializeField]
     private bool creative = false;
 
-    private void Awake()
+    private void Start()
     {
         grabItem.action.performed += UseInventory;
 
@@ -90,9 +90,9 @@ public class Inventory : MonoBehaviour
 
         if (creative) SetCreativeActive();
 
-        SetSlotsActive(false);
-
         if (slots.Last().hasItem && !creative) AddSlot();
+
+        SetSlotsActive(false);
     }
 
     /// <summary>
@@ -122,7 +122,7 @@ public class Inventory : MonoBehaviour
         var newSlot = Instantiate(slotPrefab, inventoryPrefab.transform);
         int newSlotIndex = slots.Count;
 
-        newSlot.transform.position = Vector3.zero;
+        newSlot.transform.localPosition = Vector3.zero;
         slots.Add(newSlot.GetComponent<InventorySlot>());
 
         slots[newSlotIndex].InventoryIndex = newSlotIndex;

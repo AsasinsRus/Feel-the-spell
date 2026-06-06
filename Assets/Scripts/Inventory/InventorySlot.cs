@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -206,9 +207,45 @@ public class InventorySlot : MonoBehaviour
 
     private void RegenarateItem(GameObject takenItem)
     {
-        var newItem = Instantiate(takenItem, transform.position, transform.rotation);
+        var newItem = Instantiate(takenItem, transform.position, transform.rotation).GetComponent<Collider>();
 
-        Physics.IgnoreCollision(newItem.GetComponent<Collider>(), takenItem.GetComponent<Collider>());
+        Physics.IgnoreCollision(newItem, takenItem.GetComponent<Collider>());
+
+        StartCoroutine(DisableCollisionIgnore(takenItem.GetComponent<Collider>(), newItem));
+    }
+
+    private IEnumerator DisableCollisionIgnore(Collider takenItem, Collider newItem)
+    {
+        while (takenItem != null && Vector3.Distance(takenItem.transform.position, newItem.transform.position) < distanceToGenarateItem)
+        {
+            yield return null;
+        }
+
+        Physics.IgnoreCollision(newItem, takenItem.GetComponent<Collider>(), false);
+    }
+
+    private void SetCreativeModeActive(bool state)
+    {
+        if(state)
+        {
+            if(TryGetComponent(typeof(XRGrabInteractable), out var component))
+            {
+                Destroy(component);
+            }
+
+            var creativeSlot = gameObject.AddComponent<CreativeSlotInteractable>();
+
+            creativeSlot.prefab = Item;
+        }
+        else
+        {
+            if (TryGetComponent(typeof(CreativeSlotInteractable), out var component))
+            {
+                Destroy(component);
+            }
+
+            gameObject.AddComponent<XRGrabInteractable>();
+        }
     }
 
     /// <summary>

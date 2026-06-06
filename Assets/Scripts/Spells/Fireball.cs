@@ -13,7 +13,7 @@ public class Fireball : Spell
 
     private void onHit()
     {
-        var fireOnGround = Instantiate(afterHit, transform.position, afterHit.transform.rotation);
+        var fireOnGround = Instantiate(afterHit, new Vector3(transform.position.x, 0.1f, transform.position.z), afterHit.transform.rotation);
         
         fireOnGround.GetComponent<DestroyAnim>().Destroy();
     }
