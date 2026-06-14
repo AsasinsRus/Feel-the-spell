@@ -24,6 +24,15 @@ public class InventorySlot : MonoBehaviour
 
     public bool infinite;
 
+    // fixing onDestroy Exception
+    private bool isShuttingDown = false;
+
+    private void OnApplicationQuit()
+    {
+        isShuttingDown = true;
+    }
+
+
     /// <summary>
     /// Item that this slot has.
     /// </summary>
@@ -175,6 +184,10 @@ public class InventorySlot : MonoBehaviour
     /// <param name="args"></param>
     public void TakeItem(SelectExitEventArgs args)
     {
+        // to fix exceptions after closing the game
+        if (isShuttingDown || !gameObject.activeInHierarchy) return;
+
+
         if (!inventory.isInventoryOpened || inventory.runningAnimations > 0) return;
 
         if (Item == null) return;
@@ -226,9 +239,9 @@ public class InventorySlot : MonoBehaviour
 
     private void SetCreativeModeActive(bool state)
     {
-        if(state)
+        if (state)
         {
-            if(TryGetComponent(typeof(XRGrabInteractable), out var component))
+            if (TryGetComponent(typeof(XRGrabInteractable), out var component))
             {
                 Destroy(component);
             }
@@ -325,3 +338,5 @@ public class InventorySlot : MonoBehaviour
         interactor.selectExited.RemoveAllListeners();
     }
 }
+
+
