@@ -91,5 +91,7 @@ public class SpellBuilder : MonoBehaviour
         }
 
         spellSurface.itemOnDesk.Clear();
+        spellSurface.circleAnimation.SetSpellReady(false);
+        spellSurface.circleAnimation.Clear();
     }
 }
