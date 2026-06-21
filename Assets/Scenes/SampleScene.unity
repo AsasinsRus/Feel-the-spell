@@ -3143,6 +3143,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: Feather item
       objectReference: {fileID: 0}
+    - target: {fileID: 2576320182688664304, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+      propertyPath: m_Drag
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2576320182688664304, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+      propertyPath: m_AngularDrag
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3175918603166606939, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 10.512504
+      objectReference: {fileID: 0}
+    - target: {fileID: 3175918603166606939, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 10.512504
+      objectReference: {fileID: 0}
+    - target: {fileID: 3175918603166606939, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 10.512504
+      objectReference: {fileID: 0}
     - target: {fileID: 3175918603166606939, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.29
@@ -3211,10 +3231,27 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -269.72
       objectReference: {fileID: 0}
+    - target: {fileID: 7926427337273557116, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+      propertyPath: m_Size.z
+      value: 0.0002651712
+      objectReference: {fileID: 0}
+    - target: {fileID: 7926427337273557116, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+      propertyPath: m_Center.x
+      value: 1.7386863e-11
+      objectReference: {fileID: 0}
+    - target: {fileID: 7926427337273557116, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+      propertyPath: m_Center.y
+      value: -3.4132812e-13
+      objectReference: {fileID: 0}
+    - target: {fileID: 7926427337273557116, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+      propertyPath: m_Center.z
+      value: -0.00036741537
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 3519378251870013410, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
     - {fileID: -6008700826193300567, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
+    - {fileID: 32176264989589925, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
@@ -3228,19 +3265,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 912369389594068030, guid: e9d86d1388f41fe4b85823c403d78479, type: 3}
       propertyPath: m_Name
-      value: Lightning item
+      value: Battery item
       objectReference: {fileID: 0}
     - target: {fileID: 3916172547713308509, guid: e9d86d1388f41fe4b85823c403d78479, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.166
+      value: -0.1793
       objectReference: {fileID: 0}
     - target: {fileID: 3916172547713308509, guid: e9d86d1388f41fe4b85823c403d78479, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.1045
+      value: 0.0663
       objectReference: {fileID: 0}
     - target: {fileID: 3916172547713308509, guid: e9d86d1388f41fe4b85823c403d78479, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.524
+      value: -0.3854
       objectReference: {fileID: 0}
     - target: {fileID: 3916172547713308509, guid: e9d86d1388f41fe4b85823c403d78479, type: 3}
       propertyPath: m_LocalRotation.w
