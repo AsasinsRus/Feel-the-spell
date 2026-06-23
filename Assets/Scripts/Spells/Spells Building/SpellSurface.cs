@@ -8,28 +8,31 @@ public class SpellSurface : MonoBehaviour
 
     public Transform spellSpawnpoint;
 
-    private SpellBuilder spellBuilder;
-
     [SerializeField]
     private MovementRecognizer movementRecognizer;
 
     [HideInInspector]
     public AlchemyCircleInteractionHandler circleInteractionHandler;
 
-    private void Start()
+    private void Awake()
     {
-        spellBuilder = FindAnyObjectByType<SpellBuilder>();
         circleInteractionHandler = GetComponent<AlchemyCircleInteractionHandler>();
     }
 
     private void OnEnable()
     {
         movementRecognizer.OnRecognition.AddListener(OnRecognition);
+
+        circleInteractionHandler.OnAnimationEnd += AddItem;
+        circleInteractionHandler.AfterItemGrabbed += RemoveItem;
     }
 
     private void OnDisable()
     {
-        movementRecognizer.OnRecognition.RemoveAllListeners();
+        movementRecognizer.OnRecognition.RemoveListener(OnRecognition);
+
+        circleInteractionHandler.OnAnimationEnd -= AddItem;
+        circleInteractionHandler.AfterItemGrabbed -= RemoveItem;
     }
 
     private void OnRecognition(string gestureClass, Vector3[] points)
@@ -69,24 +72,37 @@ public class SpellSurface : MonoBehaviour
         return Quaternion.LookRotation(toA, normal);
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.TryGetComponent(typeof(Item), out var item))
-        {
-            itemOnDesk.Add(item as Item);
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if (other.gameObject.TryGetComponent(typeof(Item), out var item))
+    //    {
+    //        AddItem(item);
+    //    }
+    //}
 
-            circleInteractionHandler.visual.SetSpellReady(spellBuilder.TryBuildSpell());
+    private void AddItem(Item item)
+    {
+        if(!itemOnDesk.Contains(item))
+        {
+            itemOnDesk.Add(item);
+
+            circleInteractionHandler.visual.SetSpellReady(SpellBuilder.instance.TryBuildSpell());
         }
     }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.TryGetComponent(typeof(Item), out var item))
-        {
-            itemOnDesk.Remove(item as Item);
+    //private void OnTriggerExit(Collider other)
+    //{
+    //    if (other.gameObject.TryGetComponent(typeof(Item), out var item))
+    //    {
+    //        RemoveItem(item);
+    //    }
+    //}
 
-            circleInteractionHandler.visual.SetSpellReady(spellBuilder.TryBuildSpell());
-        }
+    private void RemoveItem(Item item)
+    {
+        itemOnDesk.Remove(item);
+
+        circleInteractionHandler.visual.SetSpellReady(SpellBuilder.instance.TryBuildSpell());
     }
 
     public void ConsumeItems()

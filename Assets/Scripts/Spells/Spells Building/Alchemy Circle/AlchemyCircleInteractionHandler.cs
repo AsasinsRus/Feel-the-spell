@@ -1,10 +1,13 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
-using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit;
-using Unity.Mathematics;
-using System.Collections;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using Valve.VR.InteractionSystem;
 
 [RequireComponent(typeof(AlchemyCircleVisual)), RequireComponent(typeof(AlchemyCircleSlotLayout))]
 public class AlchemyCircleInteractionHandler : MonoBehaviour
@@ -13,6 +16,14 @@ public class AlchemyCircleInteractionHandler : MonoBehaviour
     public AlchemyCircleVisual visual;
     [HideInInspector]
     public AlchemyCircleSlotLayout slotLayout;
+
+    public event Action<Item> OnAnimationEnd;
+    public event Action<Item> AfterItemGrabbed;
+
+    [SerializeField]
+    private float minAnimationVelocity = 5f;
+
+    private Dictionary<Item, Coroutine> activeAnimations = new();
 
     private void Awake()
     {
@@ -40,19 +51,20 @@ public class AlchemyCircleInteractionHandler : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!visual.isCircleVisible) return;
         if (!other.TryGetComponent<Item>(out var item)) return;
         if (slotLayout.Contains(item)) return;
         if (!other.TryGetComponent<XRGrabInteractable>(out var interactable)) return;
-
+        
         if (interactable.isSelected)
             interactable.selectExited.AddListener(OnItemDrop);
         else
             EnqueueItem(interactable);
-
     }
 
     private void OnTriggerExit(Collider other)
     {
+        if (!visual.isCircleVisible) return;
         if (!other.TryGetComponent<XRGrabInteractable>(out var interactable)) return;
 
         interactable.selectExited.RemoveListener(OnItemDrop);
@@ -88,17 +100,23 @@ public class AlchemyCircleInteractionHandler : MonoBehaviour
         Item item = args.interactableObject.transform.GetComponent<Item>();
         XRGrabInteractable interactable = args.interactableObject as XRGrabInteractable;
 
+        TryStopAnimation(item);
+
         interactable.selectEntered.RemoveListener(OnItemGrabbed);
         interactable.selectExited.AddListener(OnItemReleaseAfterGrab);
+        interactable.selectExited.AddListener(OnItemDrop);
 
         item.KeepInPlace = false;
         slotLayout.Remove(item);
         AnimateAllToSlots();
+        
+        AfterItemGrabbed?.Invoke(item);
     }
 
     private void OnItemReleaseAfterGrab(SelectExitEventArgs args)
     {
         args.interactableObject.selectExited.RemoveListener(OnItemReleaseAfterGrab);
+
         args.interactableObject.transform.GetComponent<Rigidbody>().useGravity = true;
     }
 
@@ -109,6 +127,29 @@ public class AlchemyCircleInteractionHandler : MonoBehaviour
     }
 
     private void AnimateTo(Item item, Vector3 velocity)
+    {
+        TryStopAnimation(item);
+
+        Spline spline = BuildSpline(item, ref velocity);
+
+        float duration = Mathf.Clamp(spline.GetLength() / Mathf.Max(velocity.magnitude, minAnimationVelocity), 0.3f, 2f);
+        StartAnimation(item, spline, duration);
+    }
+
+    private void StartAnimation(Item item, Spline spline, float duration)
+    {
+        var animation = StartCoroutine(AnimateAlongSpline(item, spline, duration));
+        activeAnimations.Add(item, animation);
+    }
+
+    private void TryStopAnimation(Item item)
+    {
+        if (activeAnimations.TryGetValue(item, out var existing))
+            StopCoroutine(existing);
+        activeAnimations.Remove(item);
+    }
+
+    private Spline BuildSpline(Item item, ref Vector3 velocity)
     {
         Spline spline = new Spline();
 
@@ -124,26 +165,56 @@ public class AlchemyCircleInteractionHandler : MonoBehaviour
         spline.Add(startingKnot, TangentMode.AutoSmooth);
         spline.Add(endKnot, TangentMode.AutoSmooth);
 
-        StartCoroutine(AnimateAlongSpline(item, spline, Mathf.Clamp(velocity.magnitude * .2f, .5f, 2f)));
+        return spline;
     }
 
     private IEnumerator AnimateAlongSpline(Item item, Spline spline, float duration)
     {
+        var rb = item.transform.GetComponent<Rigidbody>();
+
         item.KeepInPlace = false;
 
+        float handoffPoint = .75f;
+        float splineLengt = spline.GetLength();
+
         float elapsed = 0f;
+
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
 
             float t = Mathf.Clamp01(elapsed / duration);
+            //float easedT = t <= .9f ? 1f - Mathf.Pow(1f - t, 3) : t;
+            //float easedT = 1f - Mathf.Pow(1f - t, 3);
 
-            spline.Evaluate(t, out float3 pos, out float3 tangent, out float3 up);
+            //if(t < handoffPoint)
+            //{
+            //    easedT = t;
+            //}
+            //else
+            //{
+            //    float localT = (t - handoffPoint) / (1f - handoffPoint);
+            //    float easedLocal = 1f - Mathf.Pow(1f - localT, 3f);
+
+            //    easedT = handoffPoint + easedLocal * (1f - handoffPoint);
+            //}
+
+            float easedT = t * t * (3f - 2f * t);
+            float startBias = Mathf.Lerp(1f, 3f, Mathf.Clamp01(duration / 1.5f));
+            easedT = Mathf.Pow(easedT, 1f / startBias);
+
+            spline.Evaluate(easedT, out float3 pos, out float3 tangent, out float3 up);
+
             item.transform.position = pos;
-            
+            rb.angularVelocity = Vector3.Lerp(rb.angularVelocity, tangent, easedT);
+
             yield return null;
         }
 
+        item.transform.position = slotLayout.GetWorldTarget(item);
         item.KeepInPlace = true;
+        activeAnimations.Remove(item);
+        
+        OnAnimationEnd?.Invoke(item);
     }
 }

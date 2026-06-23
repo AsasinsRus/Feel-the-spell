@@ -8,6 +8,11 @@ public class DestroyAnim : MonoBehaviour, IDestructable
     private float timeBeforeDestruction = 6;
     [SerializeField]
     private float timeBeforeAnim = 5;
+
+    private void Start()
+    {
+        Destroy();
+    }
     public void Destroy()
     {
         var particalSystems = GetComponentsInChildren<ParticleSystem>();

@@ -36,6 +36,7 @@ public class AlchemyCircleVisual : MonoBehaviour
         targetColor = baseCircleColor;
 
         circleImage = alchemyCircle.gameObject.GetComponent<Image>();
+        circleImage.fillAmount = 0;
     }
 
     void Update()
@@ -43,7 +44,7 @@ public class AlchemyCircleVisual : MonoBehaviour
         currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * acceleration);
         currentColor = Color.Lerp(currentColor, targetColor, Time.deltaTime * acceleration);
 
-        alchemyCircle.Rotate(new Vector3(0, 0, currentSpeed * Time.deltaTime));
+        alchemyCircle.Rotate(new Vector3(0, 0, -currentSpeed * Time.deltaTime));
         circleImage.color = currentColor;
     }
 

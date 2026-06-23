@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5611344490887968576}
   - component: {fileID: 8004124266100502020}
   - component: {fileID: 798070312004163151}
+  - component: {fileID: 6397206113512732978}
   m_Layer: 0
   m_Name: VFX_GroundFire_Circle_Green
   m_TagString: Untagged
@@ -4850,6 +4851,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeBeforeDestruction: 6
   timeBeforeAnim: 5
+--- !u!114 &6397206113512732978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1087034665551826729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e26864902c34054f814c1f75d72701e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  exitCooldown: 3
+  cooldown: 1
+  damage: 6
 --- !u!1 &5613330827607243464
 GameObject:
   m_ObjectHideFlags: 0

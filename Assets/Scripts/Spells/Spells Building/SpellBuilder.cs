@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using System.Linq;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class SpellBuilder : MonoBehaviour
 {
@@ -15,6 +16,20 @@ public class SpellBuilder : MonoBehaviour
     private SpellSurface spellSurface;
 
     private GameObject createdSpell;
+
+    public static SpellBuilder instance;
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(this);
+        }
+    }
 
 
     public bool TryBuildSpell()
@@ -31,7 +46,7 @@ public class SpellBuilder : MonoBehaviour
                     Destroy(createdSpell);
 
                 createdSpell = Instantiate(spellSO.prefab, spellSurface.spellSpawnpoint.position, spellSurface.spellSpawnpoint.rotation);
-                createdSpell.GetComponent<Spell>().OnPickUp += OnPickUp;
+                createdSpell.GetComponent<XRGrabInteractable>().selectEntered.AddListener(OnPickUp);
 
                 return true;
             }
@@ -81,8 +96,10 @@ public class SpellBuilder : MonoBehaviour
         return true;
     }
 
-    private void OnPickUp()
+    private void OnPickUp(SelectEnterEventArgs args)
     {
+        args.interactableObject.selectEntered.RemoveListener(OnPickUp);
+
         createdSpell = null;
 
         spellSurface.ConsumeItems();
