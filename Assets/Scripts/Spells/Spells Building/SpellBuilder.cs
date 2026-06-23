@@ -85,13 +85,6 @@ public class SpellBuilder : MonoBehaviour
     {
         createdSpell = null;
 
-        foreach (Item item in spellSurface.itemOnDesk)
-        {
-            Destroy(item.gameObject);
-        }
-
-        spellSurface.itemOnDesk.Clear();
-        spellSurface.circleAnimation.SetSpellReady(false);
-        spellSurface.circleAnimation.Clear();
+        spellSurface.ConsumeItems();
     }
 }

@@ -14,12 +14,12 @@ public class SpellSurface : MonoBehaviour
     private MovementRecognizer movementRecognizer;
 
     [HideInInspector]
-    public CircleAnimation circleAnimation;
+    public AlchemyCircleInteractionHandler circleInteractionHandler;
 
     private void Start()
     {
         spellBuilder = FindAnyObjectByType<SpellBuilder>();
-        circleAnimation = GetComponent<CircleAnimation>();
+        circleInteractionHandler = GetComponent<AlchemyCircleInteractionHandler>();
     }
 
     private void OnEnable()
@@ -39,8 +39,8 @@ public class SpellSurface : MonoBehaviour
         transform.position = GetCentroid(points);
         transform.rotation = GetRotationBasedOnTreeEquidistantPoints(points);
 
-        circleAnimation.SetActive(false);
-        circleAnimation.SetActive(true);
+        circleInteractionHandler.SetActive(false);
+        circleInteractionHandler.SetActive(true);   
     }
 
     private Vector3 GetCentroid(Vector3[] points)
@@ -75,7 +75,7 @@ public class SpellSurface : MonoBehaviour
         {
             itemOnDesk.Add(item as Item);
 
-            circleAnimation.SetSpellReady(spellBuilder.TryBuildSpell());
+            circleInteractionHandler.visual.SetSpellReady(spellBuilder.TryBuildSpell());
         }
     }
 
@@ -85,7 +85,19 @@ public class SpellSurface : MonoBehaviour
         {
             itemOnDesk.Remove(item as Item);
 
-            circleAnimation.SetSpellReady(spellBuilder.TryBuildSpell());
+            circleInteractionHandler.visual.SetSpellReady(spellBuilder.TryBuildSpell());
         }
+    }
+
+    public void ConsumeItems()
+    {
+        foreach (Item item in itemOnDesk)
+        {
+            Destroy(item.gameObject);
+        }
+        itemOnDesk.Clear();
+
+        circleInteractionHandler.slotLayout.Clear();
+        circleInteractionHandler.visual.SetSpellReady(false);
     }
 }

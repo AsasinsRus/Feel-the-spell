@@ -21,9 +21,29 @@ public class Item : MonoBehaviour
     private Vector3 place;
     private Quaternion rotation;
 
+    private bool keepInPlace = false;
+    public bool KeepInPlace
+    {
+        get { return keepInPlace; }
+        set
+        {
+            place = transform.position;
+            rotation = transform.rotation;
+
+            keepInPlace = value;
+        }
+    }
+
     private void Update()
     {
         OnUpdate?.Invoke();
+
+        if(keepInPlace)
+        {
+            transform.position = place;
+            transform.rotation = rotation;
+        }
+
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -34,26 +54,6 @@ public class Item : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
-
-    public void KeepInPlace(bool keep, Vector3 place)
-    {
-        if(keep)
-        { 
-            this.place = place;
-            this.rotation = transform.rotation;
-            OnUpdate += KeepInPlace;
-        }
-        else
-        {
-            OnUpdate -= KeepInPlace;
-        }
-    }
-
-    private void KeepInPlace()
-    {
-        transform.position = place;
-        transform.rotation = rotation;
     }
 
     private void OnDestroy()

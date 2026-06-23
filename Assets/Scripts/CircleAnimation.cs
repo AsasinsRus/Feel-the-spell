@@ -2,14 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
-using UnityEditor.UIElements;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.Splines;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
+/// <summary>
+/// depricated
+/// </summary>
 public class CircleAnimation : MonoBehaviour
 {
     [SerializeField]
@@ -27,11 +28,8 @@ public class CircleAnimation : MonoBehaviour
     [SerializeField]
     private float circleCreatingTime = .3f;
     public bool isCircleVisible = false;
-    [SerializeReference]
-    private float itemsCirlceRadius = .5f;
-
     [SerializeField]
-    private SplineContainer splineContainer;
+    private float itemsCirlceRadius = .5f;
 
     private Image circleImage;
     private Color currentColor;
@@ -48,7 +46,6 @@ public class CircleAnimation : MonoBehaviour
         targetColor = baseCircleColor;
 
         circleImage = alchemyCircle.gameObject.GetComponent<Image>();
-        splineContainer = GetComponent<SplineContainer>();
     }
 
     void Update()
@@ -76,7 +73,7 @@ public class CircleAnimation : MonoBehaviour
         {
             foreach (Item item in itemPositons.Keys.ToList())
             {
-                item.KeepInPlace(false, Vector3.zero);
+                item.KeepInPlace = false;
                 item.GetComponent<Rigidbody>().useGravity = true;
             }
 
@@ -177,7 +174,7 @@ public class CircleAnimation : MonoBehaviour
 
     private IEnumerator AnimateAlongSpline(Item item, Spline spline, float duration)
     {
-        item.KeepInPlace(false, item.transform.position);
+        item.KeepInPlace = false;
 
         float elapsed = 0f;
         while (elapsed < duration)
@@ -189,16 +186,16 @@ public class CircleAnimation : MonoBehaviour
             yield return null;
         }
 
-        item.KeepInPlace(true, item.transform.position);
+        item.KeepInPlace = true;
     }
 
     private void OnCircleExit(SelectEnterEventArgs args)
     {
         Rigidbody itemRB = args.interactableObject.transform.GetComponent<Rigidbody>();
-        XRGrabInteractable interactable = args.interactableObject.transform.GetComponent<XRGrabInteractable>();
+        XRGrabInteractable interactable = args.interactableObject as XRGrabInteractable;
 
         Item item = args.interactableObject.transform.GetComponent<Item>();
-        item.KeepInPlace(false, transform.position);
+        item.KeepInPlace = false;
 
         args.interactableObject.selectEntered.RemoveListener(OnCircleExit);
         args.interactableObject.selectExited.AddListener(RestoreGravity);
@@ -249,7 +246,7 @@ public class CircleAnimation : MonoBehaviour
 
     private void UpdateItemPosition(Item item, Vector3 velocity)
     {
-        Spline spline = splineContainer.AddSpline();
+        Spline spline = new Spline();
 
         BezierKnot startingKnot = new BezierKnot(item.transform.position);
         float tangentStrength = velocity.magnitude * .3f;

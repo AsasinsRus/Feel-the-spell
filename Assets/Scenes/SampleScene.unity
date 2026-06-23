@@ -3534,9 +3534,10 @@ GameObject:
   - component: {fileID: 1370953336}
   - component: {fileID: 1370953332}
   - component: {fileID: 1370953337}
-  - component: {fileID: 1370953338}
   - component: {fileID: 1370953340}
-  - component: {fileID: 1370953339}
+  - component: {fileID: 1370953343}
+  - component: {fileID: 1370953342}
+  - component: {fileID: 1370953341}
   m_Layer: 0
   m_Name: Spell surface
   m_TagString: Untagged
@@ -3559,7 +3560,7 @@ MonoBehaviour:
   itemOnDesk: []
   spellSpawnpoint: {fileID: 181284133}
   movementRecognizer: {fileID: 2137205740}
-  circleAnimation: {fileID: 0}
+  circleInteractionHandler: {fileID: 0}
 --- !u!4 &1370953336
 Transform:
   m_ObjectHideFlags: 0
@@ -3602,68 +3603,6 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 0}
   spellSurface: {fileID: 1370953332}
---- !u!114 &1370953338
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1370953331}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f13cc325200dd2408cb4c548d1336c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  alchemyCircle: {fileID: 1113435692}
-  baseRotationSpeed: 30
-  baseCircleColor: {r: 0, g: 0, b: 0, a: 1}
-  activeRotationSpeed: 200
-  activeCircleColor: {r: 1, g: 1, b: 1, a: 1}
-  acceleration: 30
-  circleCreatingTime: 0.7
-  isCircleVisible: 0
-  itemsCirlceRadius: 0.5
-  splineContainer: {fileID: 1370953339}
---- !u!114 &1370953339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1370953331}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dab5c7d4c32e743048dfca98e2d5914f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Spline:
-    m_EditModeType: 1
-    m_Knots: []
-    m_MetaData: []
-    m_Closed: 0
-    m_IntData:
-      m_Data: []
-    m_FloatData:
-      m_Data: []
-    m_Float4Data:
-      m_Data: []
-    m_ObjectData:
-      m_Data: []
-  m_Splines:
-  - m_EditModeType: 1
-    m_Knots: []
-    m_MetaData: []
-    m_Closed: 0
-    m_IntData:
-      m_Data: []
-    m_FloatData:
-      m_Data: []
-    m_Float4Data:
-      m_Data: []
-    m_ObjectData:
-      m_Data: []
-  m_Knots:
-    m_KnotsLink: []
 --- !u!135 &1370953340
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -3685,6 +3624,53 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.8
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1370953341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370953331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d82838da900dbe24fb9a32d6050a4953, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visual: {fileID: 0}
+  slotLayout: {fileID: 0}
+--- !u!114 &1370953342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370953331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd70b7a0925391743a912ce8e7b4ac14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 0.5
+--- !u!114 &1370953343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370953331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 807d3c731d2fb7a4aba6cafe841be62b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  alchemyCircle: {fileID: 1113435692}
+  baseRotationSpeed: 30
+  baseCircleColor: {r: 0, g: 0, b: 0, a: 1}
+  activeRotationSpeed: 200
+  activeCircleColor: {r: 1, g: 1, b: 1, a: 1}
+  acceleration: 30
+  circleCreatingTime: 0.3
+  isCircleVisible: 0
 --- !u!1 &1532184756
 GameObject:
   m_ObjectHideFlags: 0
