@@ -490,6 +490,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccbfe5477681aec4780dea3a74340f91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ip: localhost
 --- !u!4 &267839442
 Transform:
   m_ObjectHideFlags: 0
@@ -3647,6 +3648,7 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 0}
   spellSurface: {fileID: 1370953332}
+  lastCreatedSpell: {fileID: 0}
 --- !u!135 &1370953340
 SphereCollider:
   m_ObjectHideFlags: 0

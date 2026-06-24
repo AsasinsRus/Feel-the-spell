@@ -73,8 +73,6 @@ public class DamageOverTime : MonoBehaviour
 
             var existedStatus = health.GetStatusBySource(gameObject);
 
-            Debug.LogWarning("On coll exit");
-
             existedStatus.exitCooldownStarted = true;
         }
     }

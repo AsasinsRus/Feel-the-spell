@@ -16,23 +16,31 @@ public class AudioClient : MonoBehaviour
 
     public static AudioClient Instance;
 
+    [SerializeField]
+    private string ip = "localhost";
+
+    private bool isReading = false;
+
     private void Awake()
     {
         if (Instance == null)
             Instance = this;
         else Destroy(this);
 
-        client = new TcpClient("127.0.0.1", 65432);
+        client = new TcpClient(ip, 65432);
     }
 
     private void Update()
     {
-        if(stream != null)
-            ReadAudio();
+        ReadAudio();
     }
 
     async private void ReadAudio()
     {
+        if (stream == null || isReading) return;
+        
+        isReading = true;
+
         int bytesRead = await stream.ReadAsync(buffer);
         if (bytesRead == 0) return;
 
@@ -40,8 +48,7 @@ public class AudioClient : MonoBehaviour
         Debug.Log($"Received: {message}");
 
         OnRecognition?.Invoke(message);
+        
+        isReading = false;
     }
 }
-
-
-
