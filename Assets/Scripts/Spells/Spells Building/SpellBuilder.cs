@@ -15,7 +15,10 @@ public class SpellBuilder : MonoBehaviour
     [SerializeField]
     private SpellSurface spellSurface;
 
-    private GameObject createdSpell;
+    [HideInInspector]
+    public GameObject lastCreatedSpell;
+
+    private Dictionary<string, SpellSO> commandToSpell = new();
 
     public static SpellBuilder instance;
 
@@ -29,9 +32,51 @@ public class SpellBuilder : MonoBehaviour
         {
             Destroy(this);
         }
+
+        foreach(var spell in SpellsRegistry.Instance.Spells)
+        {
+            commandToSpell.Add(spell.spellActivationCommand, spell);
+        }
     }
 
+    /// <summary>
+    /// Tries to cast concrete spell using <paramref name="spellCastingCommand"/>.
+    /// </summary>
+    /// <param name="spellCastingCommand">Spell to cast</param>
+    /// <returns>true - if spell was casted, false - otherwise</returns>
+    public bool TryBuildSpell(string spellCastingCommand)
+    {
+        if(!commandToSpell.TryGetValue(spellCastingCommand, out SpellSO spellSO)) return false;
+        if (!HasAllComponents(spellSurface, commandToSpell[spellCastingCommand])) return false;
 
+        if (lastCreatedSpell)
+            Destroy(lastCreatedSpell);
+
+        lastCreatedSpell = Instantiate(spellSO.prefab, spellSurface.spellSpawnpoint.position, spellSurface.spellSpawnpoint.rotation);
+        lastCreatedSpell.GetComponent<XRGrabInteractable>().selectEntered.AddListener(OnPickUp);
+
+        Debug.Log("Creted " + spellSO.spellName);
+
+        return true;
+    }
+
+    public bool TryDestroyCreatedSpell()
+    {
+        if (lastCreatedSpell)
+        {
+            Destroy(lastCreatedSpell);
+            lastCreatedSpell = null;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Tries to cast a spell using components on <see cref="spellSurface"/>.
+    /// </summary>
+    /// <returns>true - if spell was casted, false - otherwise</returns>
     public bool TryBuildSpell()
     {
         if(spellSurface == null) return false;
@@ -42,20 +87,20 @@ public class SpellBuilder : MonoBehaviour
             {
                 Debug.Log("Creted " + spellSO.spellName);
 
-                if(createdSpell)
-                    Destroy(createdSpell);
+                if(lastCreatedSpell)
+                    Destroy(lastCreatedSpell);
 
-                createdSpell = Instantiate(spellSO.prefab, spellSurface.spellSpawnpoint.position, spellSurface.spellSpawnpoint.rotation);
-                createdSpell.GetComponent<XRGrabInteractable>().selectEntered.AddListener(OnPickUp);
+                lastCreatedSpell = Instantiate(spellSO.prefab, spellSurface.spellSpawnpoint.position, spellSurface.spellSpawnpoint.rotation);
+                lastCreatedSpell.GetComponent<XRGrabInteractable>().selectEntered.AddListener(OnPickUp);
 
                 return true;
             }
             else
             {
-                if(createdSpell)
+                if(lastCreatedSpell)
                 {
-                    Destroy(createdSpell);
-                    createdSpell = null;
+                    Destroy(lastCreatedSpell);
+                    lastCreatedSpell = null;
                 }
             }
         }
@@ -100,7 +145,7 @@ public class SpellBuilder : MonoBehaviour
     {
         args.interactableObject.selectEntered.RemoveListener(OnPickUp);
 
-        createdSpell = null;
+        lastCreatedSpell = null;
 
         spellSurface.ConsumeItems();
     }

@@ -25,6 +25,13 @@ public class SpellSurface : MonoBehaviour
 
         circleInteractionHandler.OnAnimationEnd += AddItem;
         circleInteractionHandler.AfterItemGrabbed += RemoveItem;
+
+        AudioClient.Instance.OnRecognition += OnRecognition;
+    }
+
+    private void OnRecognition(string message)
+    {
+        circleInteractionHandler.visual.SetSpellReady(SpellBuilder.instance.TryBuildSpell(message));
     }
 
     private void OnDisable()
@@ -86,9 +93,11 @@ public class SpellSurface : MonoBehaviour
         {
             itemOnDesk.Add(item);
 
-            circleInteractionHandler.visual.SetSpellReady(SpellBuilder.instance.TryBuildSpell());
+            SpellBuilder.instance.TryDestroyCreatedSpell();
+            circleInteractionHandler.visual.SetSpellReady(false);
         }
     }
+
 
     //private void OnTriggerExit(Collider other)
     //{
@@ -102,7 +111,8 @@ public class SpellSurface : MonoBehaviour
     {
         itemOnDesk.Remove(item);
 
-        circleInteractionHandler.visual.SetSpellReady(SpellBuilder.instance.TryBuildSpell());
+        SpellBuilder.instance.TryDestroyCreatedSpell();
+        circleInteractionHandler.visual.SetSpellReady(false);
     }
 
     public void ConsumeItems()
