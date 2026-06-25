@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -29,6 +30,8 @@ public class DirectionalMovementRecognizer : MonoBehaviour
     private VelocityTracker velocityTracker;
     
     private Dictionary<Movement, Coroutine> activeMovementRecognitions = new();
+
+    private const int MAX_WRONG_FRAMES = 3;
 
     private void Awake()
     {
@@ -126,48 +129,41 @@ public class DirectionalMovementRecognizer : MonoBehaviour
 
         movement.status = RecognitionStatus.IN_PROGRESS;
 
+        int wrongFrames = 0;
         float elapsed = 0f;
 
         while(elapsed <= recognitionTime)
         {
             elapsed += Time.deltaTime;
 
-            switch (movement.type)
+            bool correctDirection = movement.type == MovementType.POSITION_CHANGE
+                ? SimilarDirection(movement, velocityTracker.Velocity.normalized) 
+                : SimilarDirection(movement, velocityTracker.AngularVelocity.normalized);
+
+            if(correctDirection)
             {
-                case MovementType.POSITION_CHANGE:
-                    if (SimilarDirection(movement, velocityTracker.Velocity.normalized))
-                    {
-                        if (TryRecognize(movement, Vector3.Distance(startingPos, objectToCheckOnMovement.position)))
-                        {
-                            activeMovementRecognitions.Remove(movement);
-                            yield break;
-                        }
-                    }
-                    else
-                    {
-                        activeMovementRecognitions.Remove(movement);
-                        movement.status = RecognitionStatus.ABORTED;
-                        yield break;
-                    }
+                wrongFrames = 0;
 
-                    break;
-                case MovementType.ROTATION:
-                    if (SimilarDirection(movement, velocityTracker.AngularVelocity.normalized))
-                    {
-                        if(TryRecognize(movement, Quaternion.Angle(startingRot, objectToCheckOnMovement.rotation)))
-                        {
-                            activeMovementRecognitions.Remove(movement);
-                            yield break;
-                        }
-                    }
-                    else
-                    {
-                        activeMovementRecognitions.Remove(movement);
-                        movement.status = RecognitionStatus.ABORTED;
-                        yield break;
-                    }
+                float value = movement.type == MovementType.POSITION_CHANGE
+                    ? Vector3.Distance(startingPos, objectToCheckOnMovement.position)
+                    : Quaternion.Angle(startingRot, objectToCheckOnMovement.rotation);
 
-                    break;
+                if(TryRecognize(movement, value))
+                {
+                    activeMovementRecognitions.Remove(movement);
+                    yield break;
+                }
+            }
+            else
+            {
+                wrongFrames++;
+
+                if(wrongFrames > MAX_WRONG_FRAMES)
+                {
+                    activeMovementRecognitions.Remove(movement);
+                    movement.status = RecognitionStatus.ABORTED;
+                    yield break;
+                }
             }
 
             WhileMovementRecognition?.Invoke();
