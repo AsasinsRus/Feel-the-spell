@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Gestures;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -14,11 +15,14 @@ using static Unity.VisualScripting.Member;
 public class HandGraspDetector : MonoBehaviour
 {
     private const float ANGLE_TO_THE_PALM =  45f;
+    private const float THUMB_OPPOSITION_ANGLE =  90f;
     
     private const int GRASP_SCORE_THRESHOLD = 10;
     private const int RELEASE_SCORE_THRESHOLD = 7;
 
     private const int CURL_SCORE = 1;
+    private const int PALM_SCORE = 2;
+    private const int THUMB_OPPOSED_SCORE = 2;
 
     [Header ("Hand info")]
     [SerializeField]
@@ -40,6 +44,9 @@ public class HandGraspDetector : MonoBehaviour
 
     [SerializeField]
     private Collider palm;
+    [SerializeField]
+    private float closeToPalmThreshold;
+    private HashSet<XRGrabInteractable> closeToPalm = new();
 
     [Header("Interactions")]
     [SerializeField]
@@ -56,14 +63,23 @@ public class HandGraspDetector : MonoBehaviour
     private Dictionary<XRGrabInteractable, int> interactableScorings = new();
     private Dictionary<FingerTouchData, HashSet<XRGrabInteractable>> touchedByFinger = new();
 
-    XRHandSubsystem handSubsystem;
+    private XRHandSubsystem handSubsystem;
+
+    private HashSet<XRGrabInteractable> thumbOpposedFinger = new();
 
     private void Awake()
     {
-        if(thumbTip.fingerTipCollider == null)
+        if (!FingersSetup()) return;
+
+        handSubsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
+    }
+
+    private bool FingersSetup()
+    {
+        if (thumbTip.fingerTipCollider == null)
         {
             Debug.LogError("Thumb was not added!");
-            return;
+            return false;
         }
 
         //fingers.Add(thumbTip);
@@ -81,11 +97,11 @@ public class HandGraspDetector : MonoBehaviour
         if (objToFingersData.Values.Skip(1).All(m => m == null))
         {
             Debug.LogError("No fingers were detected!");
-            return;
+            return false;
         }
 
         thumbTip.fingerTipCollider.GetOrAddComponent<ColliderEvents>();
-        foreach(var finger in objToFingersData.Values)
+        foreach (var finger in objToFingersData.Values)
         {
             if (finger == null) continue;
 
@@ -93,38 +109,106 @@ public class HandGraspDetector : MonoBehaviour
 
             colliderEvents.OnTriggerEnter_ += OnInteractableFingerTouch;
             colliderEvents.OnTriggerExit_ += OnInteractableFingerUntouch;
+
+            touchedByFinger[finger] = new();
         }
 
-        handSubsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
+        return true;
     }
 
     private void Update()
     {
         if (handSubsystem == null) return;
-        if(!CurrentHand.isTracked)
+        if (!CurrentHand.isTracked)
         {
-            if(selectedInteractable != null)
+            if (selectedInteractable != null)
                 ReleaseSelected();
 
             return;
         }
 
-        foreach(var fingerData in objToFingersData.Values)
+        CurlCheck();
+        PalmCheck();
+        ThumbOpposedToFingerCheck();
+    }
+
+    private void CurlCheck()
+    {
+        foreach (var fingerData in objToFingersData.Values)
         {
-            if(IsFingerCurledEnough(fingerData) && !fingerData.isCurledEnough)
+            if (fingerData == null) continue;
+
+            if (IsFingerCurledEnough(fingerData) && !fingerData.isCurledEnough)
             {
                 fingerData.isCurledEnough = true;
-                foreach(var interactable in touchedByFinger[fingerData])
+                foreach (var interactable in touchedByFinger[fingerData])
                 {
                     AddScore(interactable, CURL_SCORE);
                 }
             }
-            else if(!IsFingerCurledEnough(fingerData) && fingerData.isCurledEnough)
+            else if (!IsFingerCurledEnough(fingerData) && fingerData.isCurledEnough)
             {
                 fingerData.isCurledEnough = false;
                 foreach (var interactable in touchedByFinger[fingerData])
                 {
                     RemoveScore(interactable, CURL_SCORE);
+                }
+            }
+        }
+    }
+
+    private void PalmCheck()
+    {
+        foreach (var interactable in touchedByFinger[thumbTip])
+        {
+            Vector3 interactableCenter = interactable.GetComponent<Collider>().bounds.center;
+            Vector3 palmCenter = palm.bounds.center;
+
+            if (Vector3.Distance(interactableCenter, palmCenter) <= closeToPalmThreshold
+                && !closeToPalm.Contains(interactable))
+            {
+                closeToPalm.Add(interactable);
+                AddScore(interactable, PALM_SCORE);
+            }
+            else if (Vector3.Distance(interactableCenter, palmCenter) > closeToPalmThreshold
+                && closeToPalm.Contains(interactable))
+            {
+                closeToPalm.Remove(interactable);
+                RemoveScore(interactable, PALM_SCORE);
+            }
+        }
+    }
+
+    private void ThumbOpposedToFingerCheck()
+    {
+        if (thumbTip == null) return;
+
+        foreach (var interactable in touchedByFinger[thumbTip])
+        {
+            foreach (var finger in objToFingersData.Values.Skip(1))
+            {
+                if (finger == null) continue;
+
+                foreach (var fingerInteractable in touchedByFinger[finger])
+                {
+                    if (interactable == fingerInteractable)
+                    {
+                        Vector3 thumbToIntectable = thumbTip.fingerTipCollider.bounds.center - interactable.GetComponent<Collider>().bounds.center;
+                        Vector3 fingerToIntectable = finger.fingerTipCollider.bounds.center - interactable.GetComponent<Collider>().bounds.center;
+
+                        if (Vector3.Angle(thumbToIntectable, fingerToIntectable) >= THUMB_OPPOSITION_ANGLE
+                            && !thumbOpposedFinger.Contains(interactable))
+                        {
+                            thumbOpposedFinger.Add(interactable);
+                            AddScore(interactable, THUMB_OPPOSED_SCORE);
+                        }
+                        else if (Vector3.Angle(thumbToIntectable, fingerToIntectable) < THUMB_OPPOSITION_ANGLE
+                            && thumbOpposedFinger.Contains(interactable))
+                        {
+                            thumbOpposedFinger.Remove(interactable);
+                            RemoveScore(interactable, THUMB_OPPOSED_SCORE);
+                        }
+                    }
                 }
             }
         }
@@ -144,8 +228,10 @@ public class HandGraspDetector : MonoBehaviour
         {
             if (DirectedIntoTheHand(source, other))
             {
-                touchedByFinger[objToFingersData[source]].Add(interactable);
-                AddScore(interactable, objToFingersData[source].touchScore);
+                var finger = objToFingersData[source];
+
+                if (touchedByFinger[finger].Add(interactable)) 
+                    AddScore(interactable, objToFingersData[source].touchScore);
             }
         }
     }
@@ -154,7 +240,7 @@ public class HandGraspDetector : MonoBehaviour
     {
         Vector3 fingerPos = objToFingersData[source].fingerTipCollider.transform.position;
 
-        Vector3 toObject = other.transform.position - fingerPos;
+        Vector3 toObject = other.bounds.center - fingerPos;
         Vector3 inwardDirection = objToFingersData[source].fingerTipCollider.transform.TransformDirection(objToFingersData[source].insidePalmDirection);
 
         return Vector3.Angle(inwardDirection, toObject) <= ANGLE_TO_THE_PALM;
@@ -166,8 +252,10 @@ public class HandGraspDetector : MonoBehaviour
         {
             if (DirectedIntoTheHand(source, other))
             {
-                touchedByFinger[objToFingersData[source]].Remove(interactable);
-                RemoveScore(interactable, objToFingersData[source].touchScore);
+                var finger = objToFingersData[source];
+
+                if (touchedByFinger[finger].Remove(interactable)) 
+                    RemoveScore(interactable, objToFingersData[source].touchScore);
             }
         }
     }
@@ -199,7 +287,11 @@ public class HandGraspDetector : MonoBehaviour
 
     private void EstimateCandidates()
     {
-        if (interactableScorings.Count == 0) return;
+        if (interactableScorings.Count == 0)
+        {
+            currentCandidate = null;
+            return;
+        }
 
         var maxScoring = interactableScorings.Max();
 
@@ -208,13 +300,13 @@ public class HandGraspDetector : MonoBehaviour
 
     private bool TryGrasp()
     {
-        if (currentCandidate != null && interactableScorings[currentCandidate] >= GRASP_SCORE_THRESHOLD)
+        if (currentCandidate != null && interactableScorings.TryGetValue(currentCandidate, out var currentScore) && currentScore >= GRASP_SCORE_THRESHOLD)
         {
             GraspCurrentCandidate();
 
             return true;
         }
-        else if(selectedInteractable != null && interactableScorings[selectedInteractable] < RELEASE_SCORE_THRESHOLD)
+        else if(selectedInteractable != null && interactableScorings.TryGetValue(selectedInteractable, out var selectedScore) && selectedScore < RELEASE_SCORE_THRESHOLD)
         {
             ReleaseSelected();
         }
