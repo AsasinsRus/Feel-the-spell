@@ -190,6 +190,23 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    public void Open()
+    {
+        if (!isInventoryOpened)
+            ShowInventory();
+        else
+        {
+            StopCoroutine(MoveInvenory());
+            StartCoroutine(MoveInvenory());
+        }
+    }
+
+    public void Close()
+    {
+        if (isInventoryOpened)
+            HideInventory();
+    }
+
     private void ShowInventory()
     {
         SetSlotsActive(true);
@@ -264,6 +281,27 @@ public class Inventory : MonoBehaviour
         {
             slot.ItemIsInteractable = state;
         }
+    }
+
+    IEnumerator MoveInvenory()
+    {
+        Vector3 startPos = transform.position;
+        Quaternion startRot = transform.rotation;
+        float timeStamp = Time.time;
+
+        runningAnimations++;
+
+        while (Time.time - timeStamp < animationTime)
+        {
+            float percent = (Time.time - timeStamp) / animationTime;
+
+            transform.position = Vector3.Lerp(startPos, inventoryAnchor.position, percent);
+            transform.rotation = Quaternion.Lerp(startRot, Quaternion.Euler(.0f, inventoryAnchor.eulerAngles.y, .0f), percent);
+
+            yield return null;
+        }
+
+        runningAnimations--;
     }
 
     IEnumerator InventoryAnim(Transform toAnim, Vector3 to, Action callback = null)

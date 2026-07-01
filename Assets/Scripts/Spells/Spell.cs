@@ -1,89 +1,91 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
-using UnityEngine.XR.Interaction.Toolkit.Interactables;
+//using System;
+//using System.Collections;
+//using System.Collections.Generic;
+//using UnityEngine;
+//using UnityEngine.XR.Interaction.Toolkit;
+//using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
-public class Spell : MonoBehaviour
-{
-    public event Action OnHit;
-    public event Action OnPickUp;
+// Deprecated
 
-    public SpellSO spellSO;
+//public class Spell : MonoBehaviour
+//{
+//    public event Action OnHit;
+//    public event Action OnPickUp;
 
-    private Rigidbody rb;
-    protected XRGrabInteractable interactable;
+//    public SpellSO spellSO;
 
-    [SerializeField]
-    private float hitCollisionRadius = 1;
+//    private Rigidbody rb;
+//    protected XRGrabInteractable interactable;
 
-    [SerializeField]
-    private float forceMultiplier = 2.5f;
+//    [SerializeField]
+//    private float hitCollisionRadius = 1;
 
-    private void Awake()
-    {
-        rb = GetComponent<Rigidbody>();
-        interactable = GetComponent<XRGrabInteractable>();
+//    [SerializeField]
+//    private float forceMultiplier = 2.5f;
 
-        rb.useGravity = false;
-        rb.isKinematic = true;
+//    private void Awake()
+//    {
+//        rb = GetComponent<Rigidbody>();
+//        interactable = GetComponent<XRGrabInteractable>();
 
-        interactable.selectExited.AddListener(OnSelectExit);
-        interactable.selectEntered.AddListener(OnSelectEnter);
-    }
+//        rb.useGravity = false;
+//        rb.isKinematic = true;
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        OnHit?.Invoke();
+//        interactable.selectExited.AddListener(OnSelectExit);
+//        interactable.selectEntered.AddListener(OnSelectEnter);
+//    }
 
-        var collisions = Physics.OverlapSphere(transform.position, hitCollisionRadius);
+//    private void OnCollisionEnter(Collision collision)
+//    {
+//        OnHit?.Invoke();
 
-        foreach(var _collision in collisions)
-        {
-            if (_collision.gameObject.TryGetComponent(typeof(IDamagable), out var component))
-            {
-                Debug.Log(_collision.gameObject.name + " was damaged by " + spellSO.damage);
+//        var collisions = Physics.OverlapSphere(transform.position, hitCollisionRadius);
 
-                (component as IDamagable).Damage(spellSO.damage);
-            }
-        }
+//        foreach(var _collision in collisions)
+//        {
+//            if (_collision.gameObject.TryGetComponent(typeof(IDamagable), out var component))
+//            {
+//                Debug.Log(_collision.gameObject.name + " was damaged by " + spellSO.damage);
 
-        Destroy(gameObject);
-    }
+//                (component as IDamagable).Damage(spellSO.damage);
+//            }
+//        }
 
-    private void OnSelectExit(SelectExitEventArgs args)
-    {
-        rb.useGravity = true;
-        rb.isKinematic = false;
+//        Destroy(gameObject);
+//    }
 
-        StartCoroutine(ApplyMultpiplier());
-    }
+//    private void OnSelectExit(SelectExitEventArgs args)
+//    {
+//        rb.useGravity = true;
+//        rb.isKinematic = false;
 
-    private IEnumerator ApplyMultpiplier()
-    {
-        yield return null;
+//        StartCoroutine(ApplyMultpiplier());
+//    }
 
-        rb.linearVelocity *= forceMultiplier;
-    }
+//    private IEnumerator ApplyMultpiplier()
+//    {
+//        yield return null;
 
-    private void OnSelectEnter(SelectEnterEventArgs args)
-    {
-        OnPickUp?.Invoke();
-    }
+//        rb.linearVelocity *= forceMultiplier;
+//    }
 
-    private void OnDestroy()
-    {
-        interactable.selectExited.RemoveAllListeners();
-        interactable.selectEntered.RemoveAllListeners();
+//    private void OnSelectEnter(SelectEnterEventArgs args)
+//    {
+//        OnPickUp?.Invoke();
+//    }
 
-        OnHit = null;
-        OnPickUp = null;
-    }
+//    private void OnDestroy()
+//    {
+//        interactable.selectExited.RemoveAllListeners();
+//        interactable.selectEntered.RemoveAllListeners();
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, hitCollisionRadius);
-    }
-}
+//        OnHit = null;
+//        OnPickUp = null;
+//    }
+
+//    private void OnDrawGizmos()
+//    {
+//        Gizmos.color = Color.red;
+//        Gizmos.DrawWireSphere(transform.position, hitCollisionRadius);
+//    }
+//}

@@ -6,6 +6,8 @@ public class SpellSO : ScriptableObject
     public string spellName;
     public string description;
 
+    public string spellActivationCommand;
+
     public int damage;
 
     public ItemSO[] materialComponents;
