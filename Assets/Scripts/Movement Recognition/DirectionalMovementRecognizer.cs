@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -20,6 +21,10 @@ public class DirectionalMovementRecognizer : MonoBehaviour
     [SerializeField]
     public float recognitionTime;
 
+    [SerializeField]
+    public float resetTimerAfterFirstSuccess = .1f;
+    private Coroutine resetCoroutine;
+
     public bool recognize;
 
     [SerializeField]
@@ -30,12 +35,18 @@ public class DirectionalMovementRecognizer : MonoBehaviour
     private VelocityTracker velocityTracker;
     
     private Dictionary<Movement, Coroutine> activeMovementRecognitions = new();
+    private Dictionary<Movement, bool> results = new();
 
     private const int MAX_WRONG_FRAMES = 3;
 
     private void Awake()
     {
         objectToCheckOnMovement.TryGetComponent(out velocityTracker);
+
+        foreach (var movement in movements)
+        {
+            results.Add(movement, false);
+        }
     }
 
     private void Update()
@@ -53,16 +64,19 @@ public class DirectionalMovementRecognizer : MonoBehaviour
             bool anyAborted = movements.Any(m => m.status == RecognitionStatus.ABORTED);
             bool allEnded = movements.All(m => m.status == RecognitionStatus.ENDED);
 
-            if(allEnded && movements.Length > 0)
+            bool allSuccess = results.Values.All(m => m);
+
+            if(allSuccess && results.Keys.Count > 0)
+            {
                 OnMovementsRecognition?.Invoke();
+                ResultsReset();
+            }
 
             if(anyAborted || allEnded)
             {
                 RecognitionReset();
             }
         }
-
-        if (movements.Any(m => m.status != RecognitionStatus.NOT_STARTED)) return;
 
         foreach (var movement in movements)
         {
@@ -79,6 +93,23 @@ public class DirectionalMovementRecognizer : MonoBehaviour
             }
         }
 
+    }
+
+    private IEnumerator ResultsReset()
+    {
+        //foreach (var activeMovement in activeMovementRecognitions)
+        //{
+        //    StopCoroutine(activeMovement.Value);
+        //}
+
+        yield return new WaitForSeconds(resetTimerAfterFirstSuccess);
+
+        foreach(var result in results.Keys.ToList())
+        {
+            results[result] = false;
+        }
+
+        resetCoroutine = null;
     }
 
     private void RecognitionReset()
@@ -151,6 +182,12 @@ public class DirectionalMovementRecognizer : MonoBehaviour
                 if(TryRecognize(movement, value))
                 {
                     activeMovementRecognitions.Remove(movement);
+                    
+                    if(!results.TryAdd(movement, true))
+                        results[movement] = true;
+                    if (resetCoroutine == null)
+                        resetCoroutine = StartCoroutine(ResultsReset());
+
                     yield break;
                 }
             }
@@ -162,6 +199,7 @@ public class DirectionalMovementRecognizer : MonoBehaviour
                 {
                     activeMovementRecognitions.Remove(movement);
                     movement.status = RecognitionStatus.ABORTED;
+
                     yield break;
                 }
             }
