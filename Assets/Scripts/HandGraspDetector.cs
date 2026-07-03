@@ -4,19 +4,17 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Gestures;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Management;
-using static Unity.VisualScripting.Member;
 
 public class HandGraspDetector : MonoBehaviour
 {
-    private const float ANGLE_TO_THE_PALM =  45f;
-    private const float THUMB_OPPOSITION_ANGLE =  90f;
-    
+    private const float ANGLE_TO_THE_PALM = 45f;
+    private const float THUMB_OPPOSITION_ANGLE = 70f;
+
     private const int GRASP_SCORE_THRESHOLD = 10;
     private const int RELEASE_SCORE_THRESHOLD = 7;
 
@@ -24,7 +22,7 @@ public class HandGraspDetector : MonoBehaviour
     private const int PALM_SCORE = 2;
     private const int THUMB_OPPOSED_SCORE = 2;
 
-    [Header ("Hand info")]
+    [Header("Hand info")]
     [SerializeField]
     private FingerTouchData thumbTip;
     [SerializeField]
@@ -38,6 +36,9 @@ public class HandGraspDetector : MonoBehaviour
     [SerializeField]
     private Handedness handedness;
     private XRHand CurrentHand => handedness == Handedness.Left ? handSubsystem.leftHand : handSubsystem.rightHand;
+    [SerializeField]
+    private Transform hand;
+    private Transform attachPoint;
 
     //private List<FingerTouchData> fingers = new();
     private Dictionary<GameObject, FingerTouchData> objToFingersData = new();
@@ -66,10 +67,19 @@ public class HandGraspDetector : MonoBehaviour
     private XRHandSubsystem handSubsystem;
 
     private HashSet<XRGrabInteractable> thumbOpposedFinger = new();
+    private HashSet<XRGrabInteractable> registeredOnDestruction = new();
+
+    [SerializeField]
+    private bool log = false;
 
     private void Awake()
     {
         if (!FingersSetup()) return;
+
+        attachPoint = Instantiate((new GameObject()).transform, hand);
+        attachPoint.name = "Attach point";
+
+        interactor.attachTransform = attachPoint;
 
         handSubsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
     }
@@ -94,7 +104,7 @@ public class HandGraspDetector : MonoBehaviour
         objToFingersData.Add(ringTip.fingerTipCollider.gameObject, ringTip);
         objToFingersData.Add(pinkyTip.fingerTipCollider.gameObject, pinkyTip);
 
-        if (objToFingersData.Values.Skip(1).All(m => m == null))
+        if (objToFingersData.Values.Skip(1).All(m => m == null || m.fingerTipCollider == null))
         {
             Debug.LogError("No fingers were detected!");
             return false;
@@ -110,7 +120,7 @@ public class HandGraspDetector : MonoBehaviour
             colliderEvents.OnTriggerEnter_ += OnInteractableFingerTouch;
             colliderEvents.OnTriggerExit_ += OnInteractableFingerUntouch;
 
-            touchedByFinger[finger] = new();
+            touchedByFinger.Add(finger, new());
         }
 
         return true;
@@ -143,6 +153,8 @@ public class HandGraspDetector : MonoBehaviour
                 fingerData.isCurledEnough = true;
                 foreach (var interactable in touchedByFinger[fingerData])
                 {
+                    if (log) Debug.Log(fingerData.handFingerID + " is curled enough");
+                    
                     AddScore(interactable, CURL_SCORE);
                 }
             }
@@ -161,12 +173,19 @@ public class HandGraspDetector : MonoBehaviour
     {
         foreach (var interactable in touchedByFinger[thumbTip])
         {
-            Vector3 interactableCenter = interactable.GetComponent<Collider>().bounds.center;
+            if (!TryGetInteractableCenter(interactable, out var interactableCenter))
+            {
+                closeToPalm.Remove(interactable);
+                continue;
+            }
+
             Vector3 palmCenter = palm.bounds.center;
 
             if (Vector3.Distance(interactableCenter, palmCenter) <= closeToPalmThreshold
                 && !closeToPalm.Contains(interactable))
             {
+                if (log) Debug.Log("Palm is close enough to " + interactable.name);
+
                 closeToPalm.Add(interactable);
                 AddScore(interactable, PALM_SCORE);
             }
@@ -179,12 +198,32 @@ public class HandGraspDetector : MonoBehaviour
         }
     }
 
+    private bool TryGetInteractableCenter(XRGrabInteractable interactable, out Vector3 center)
+    {
+        center = default;
+
+        if (!interactable) return false;
+
+        var col = interactable.GetComponentInChildren<Collider>();
+        if (!col) return false;
+
+        center = col.bounds.center;
+
+        return true;
+    }
+
     private void ThumbOpposedToFingerCheck()
     {
         if (thumbTip == null) return;
 
         foreach (var interactable in touchedByFinger[thumbTip])
         {
+            if(!TryGetInteractableCenter(interactable, out var interactableCenter))
+            {
+                thumbOpposedFinger.Remove(interactable);
+                continue;
+            }
+
             foreach (var finger in objToFingersData.Values.Skip(1))
             {
                 if (finger == null) continue;
@@ -193,16 +232,18 @@ public class HandGraspDetector : MonoBehaviour
                 {
                     if (interactable == fingerInteractable)
                     {
-                        Vector3 thumbToIntectable = thumbTip.fingerTipCollider.bounds.center - interactable.GetComponent<Collider>().bounds.center;
-                        Vector3 fingerToIntectable = finger.fingerTipCollider.bounds.center - interactable.GetComponent<Collider>().bounds.center;
+                        Vector3 interactableToThumb = interactableCenter - interactable.GetComponentInChildren<Collider>().bounds.center;
+                        Vector3 interactableToFinger = finger.fingerTipCollider.bounds.center - interactable.GetComponentInChildren<Collider>().bounds.center;
 
-                        if (Vector3.Angle(thumbToIntectable, fingerToIntectable) >= THUMB_OPPOSITION_ANGLE
+                        if (Vector3.Angle(interactableToThumb, interactableToFinger) >= THUMB_OPPOSITION_ANGLE
                             && !thumbOpposedFinger.Contains(interactable))
                         {
+                            if (log) Debug.Log("Thumb is opposed enough to " + finger.handFingerID + " for " + interactable.name);
+
                             thumbOpposedFinger.Add(interactable);
                             AddScore(interactable, THUMB_OPPOSED_SCORE);
                         }
-                        else if (Vector3.Angle(thumbToIntectable, fingerToIntectable) < THUMB_OPPOSITION_ANGLE
+                        else if (Vector3.Angle(interactableToThumb, interactableToFinger) < THUMB_OPPOSITION_ANGLE
                             && thumbOpposedFinger.Contains(interactable))
                         {
                             thumbOpposedFinger.Remove(interactable);
@@ -224,16 +265,58 @@ public class HandGraspDetector : MonoBehaviour
 
     private void OnInteractableFingerTouch(Collider other, GameObject source)
     {
-        if (other.TryGetComponent<XRGrabInteractable>(out var interactable))
-        {
-            if (DirectedIntoTheHand(source, other))
-            {
-                var finger = objToFingersData[source];
+        var interactable = other.GetComponentInParent<XRGrabInteractable>();
 
-                if (touchedByFinger[finger].Add(interactable)) 
-                    AddScore(interactable, objToFingersData[source].touchScore);
+        if (!interactable) return;
+
+        if (DirectedIntoTheHand(source, other))
+        {
+            if (!objToFingersData.ContainsKey(source)) return;
+
+            if (log) Debug.Log(objToFingersData[source].handFingerID + " is touching " + other.name + " from the correct side");
+
+            var finger = objToFingersData[source];
+
+            if (touchedByFinger[finger].Add(interactable))
+            {
+                AddScore(interactable, objToFingersData[source].touchScore);
+
+                if (registeredOnDestruction.Add(interactable))
+                {
+                    if (!interactable.TryGetComponent<DestroyNotifier>(out var destroyNotifier))
+                    {
+                        destroyNotifier = interactable.AddComponent<DestroyNotifier>();
+                    }
+                    destroyNotifier.OnDestroy_.RemoveListener(OnInteractableDestroy);
+                    destroyNotifier.OnDestroy_.AddListener(OnInteractableDestroy);
+                }
             }
         }
+    }
+
+    private void OnInteractableDestroy(GameObject gameObject)
+    {
+        var interactable = gameObject.GetComponent<XRGrabInteractable>();
+
+        if (interactable == null) return;
+
+        registeredOnDestruction.Remove(interactable);
+
+        if (selectedInteractable == interactable)
+        {
+            if (interactor)
+                interactor.EndManualInteraction();
+
+            selectedInteractable = null;
+        }
+        if (currentCandidate == interactable) currentCandidate = null;
+        
+        interactableScorings.Remove(interactable);
+        closeToPalm.Remove(interactable);
+        thumbOpposedFinger.Remove(interactable);
+
+        foreach (var finger in touchedByFinger.Keys.ToList())
+            touchedByFinger[finger].Remove(interactable);
     }
 
     private bool DirectedIntoTheHand(GameObject source, Collider other)
@@ -248,14 +331,23 @@ public class HandGraspDetector : MonoBehaviour
 
     private void OnInteractableFingerUntouch(Collider other, GameObject source)
     {
-        if (other.TryGetComponent<XRGrabInteractable>(out var interactable))
-        {
-            if (DirectedIntoTheHand(source, other))
-            {
-                var finger = objToFingersData[source];
+        var interactable = other.GetComponentInParent<XRGrabInteractable>();
 
-                if (touchedByFinger[finger].Remove(interactable)) 
-                    RemoveScore(interactable, objToFingersData[source].touchScore);
+        if (!interactable) return;
+
+        if (DirectedIntoTheHand(source, other))
+        {
+            var finger = objToFingersData[source];
+
+            if (touchedByFinger[finger].Remove(interactable))
+            {
+                RemoveScore(interactable, objToFingersData[source].touchScore);
+
+                if (interactable.TryGetComponent<DestroyNotifier>(out var destroyNotifier)
+                    && touchedByFinger.All(m => !m.Value.Contains(interactable)))
+                {
+                    destroyNotifier.OnDestroy_.RemoveListener(OnInteractableDestroy);
+                }
             }
         }
     }
@@ -293,22 +385,37 @@ public class HandGraspDetector : MonoBehaviour
             return;
         }
 
-        var maxScoring = interactableScorings.Max();
+        var maxScoring = interactableScorings.Aggregate(
+            (best, next) =>
+                next.Value > best.Value
+                ? next
+                : best
+            );  
 
         currentCandidate = maxScoring.Key;
+
+        if (log) Debug.Log("Current candidate : " + currentCandidate.name + " has score of " + maxScoring.Value);
     }
 
     private bool TryGrasp()
     {
-        if (currentCandidate != null && interactableScorings.TryGetValue(currentCandidate, out var currentScore) && currentScore >= GRASP_SCORE_THRESHOLD)
+        if (currentCandidate != null && currentCandidate != selectedInteractable
+            && interactableScorings.TryGetValue(currentCandidate, out var currentScore) 
+            && currentScore >= GRASP_SCORE_THRESHOLD)
         {
+            if (log) Debug.Log("Grasp condition was achived");
+
             GraspCurrentCandidate();
 
             return true;
         }
-        else if(selectedInteractable != null && interactableScorings.TryGetValue(selectedInteractable, out var selectedScore) && selectedScore < RELEASE_SCORE_THRESHOLD)
+        else if (selectedInteractable != null)
         {
-            ReleaseSelected();
+            if(!interactableScorings.TryGetValue(selectedInteractable, out var selectedScore) 
+                || selectedScore < RELEASE_SCORE_THRESHOLD)
+            {
+                ReleaseSelected();
+            }
         }
 
         return false;
@@ -316,6 +423,13 @@ public class HandGraspDetector : MonoBehaviour
 
     private void GraspCurrentCandidate()
     {
+        if (!interactor || !currentCandidate) return;
+
+        if (selectedInteractable) ReleaseSelected();
+
+        attachPoint.position = currentCandidate.transform.position;
+        interactor.StartManualInteraction((IXRSelectInteractable)currentCandidate);
+
         OnGrap?.Invoke(currentCandidate);
         selectedInteractable = currentCandidate;
         currentCandidate = null;
@@ -323,8 +437,32 @@ public class HandGraspDetector : MonoBehaviour
 
     private void ReleaseSelected()
     {
+        if (!interactor || !selectedInteractable) return;
+
         OnRelease?.Invoke(selectedInteractable);
+        interactor.EndManualInteraction();
         selectedInteractable = null;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        DrawFingerGizmos(thumbTip);
+        DrawFingerGizmos(indexTip);
+        DrawFingerGizmos(middleTip);
+        DrawFingerGizmos(ringTip);
+        DrawFingerGizmos(pinkyTip);
+    }
+
+    private void DrawFingerGizmos(FingerTouchData finger)
+    {
+        if (finger != null && finger.fingerTipCollider != null)
+        {
+            Gizmos.color = Color.white;
+
+            Vector3 startingPoint = finger.fingerTipCollider.bounds.center;
+
+            Gizmos.DrawLine(startingPoint, startingPoint + finger.insidePalmDirection.normalized * .03f);
+        }
     }
 }
 
