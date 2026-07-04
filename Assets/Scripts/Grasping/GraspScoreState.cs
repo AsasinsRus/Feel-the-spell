@@ -1,5 +1,7 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+
+DEPRECATED
 
 public sealed class GraspScoreState
 {
@@ -129,4 +131,4 @@ public sealed class InteractableGraspState
     {
         this.Interactable = interactable;
     }
-}
+}*/

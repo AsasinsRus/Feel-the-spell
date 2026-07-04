@@ -15,11 +15,6 @@ public class HandGraspDetector : MonoBehaviour
     private const float ANGLE_TO_THE_PALM = 45f;
     private const float THUMB_OPPOSITION_ANGLE = 70f;
 
-    private const int GRASP_SCORE_THRESHOLD = 10;
-    private const int RELEASE_SCORE_THRESHOLD = 8;
-
-    private const int CURL_SCORE = 1;
-
     [Header("Hand info")]
     [SerializeField]
     private FingerTouchData thumbTip;
@@ -47,14 +42,13 @@ public class HandGraspDetector : MonoBehaviour
 
     [Header("Events")]
     [SerializeField]
-    public UnityEvent<XRGrabInteractable> OnGrap;
+    public UnityEvent<XRGrabInteractable> OnGrab;
     [SerializeField]
     public UnityEvent<XRGrabInteractable> OnRelease;
 
     private XRHandSubsystem handSubsystem;
 
     private FingerContactRegistry contactRegistry;
-    private GraspScoreState scoreState;
     private XRIHandGrabber grabber;
 
     [SerializeField]
@@ -66,7 +60,6 @@ public class HandGraspDetector : MonoBehaviour
 
         handSubsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
 
-        scoreState = new GraspScoreState();
         grabber = new XRIHandGrabber(interactor, hand);
     }
 
@@ -112,37 +105,21 @@ public class HandGraspDetector : MonoBehaviour
             return;
         }
 
-        CurlCheck();
-        PalmCheck();
-        ThumbOpposedToFingerCheck();
-
-        TryGrasp();
+        ReevaluateCurrentGrasp();
     }
 
-    private void CurlCheck()
+    private void ReevaluateCurrentGrasp()
     {
-        foreach (var finger in contactRegistry.Fingers)
+        if(grabber.SelectedInteractable != null)
         {
-            if (finger == null) continue;
+            TryGrasp(grabber.SelectedInteractable);
+            return;
+        }
 
-            bool isCurledNow = IsFingerCurledEnough(finger);
-
-            if (finger.isCurledEnough == isCurledNow)
-                continue;
-
-            finger.isCurledEnough = isCurledNow;
-
-            foreach(var interactable in contactRegistry.GetTouches(finger))
-            {
-                if (isCurledNow)
-                {
-                    scoreState.AddScore(interactable, CURL_SCORE);
-                    if (log)
-                        Debug.Log(finger.handFingerID + " is curled enough");
-                }
-                else
-                    scoreState.RemoveScore(interactable, CURL_SCORE);
-            }
+        foreach(var interactable in contactRegistry.GetAllTouches())
+        {
+            if(TryGrasp(interactable)) 
+                return;
         }
     }
 
@@ -151,14 +128,6 @@ public class HandGraspDetector : MonoBehaviour
         HandCurlProvider.TryGetFingerCurl(CurrentHand, fingerTouchData.handFingerID, out float curl);
 
         return curl >= fingerTouchData.fingerCurlThreshold;
-    }
-
-    private void PalmCheck()
-    {
-        foreach (var interactable in contactRegistry.GetAllTouches())
-        {
-            scoreState.SetPalmState(interactable, IsNearPalm(interactable));
-        }
     }
 
     private bool IsNearPalm(XRGrabInteractable interactable)
@@ -184,16 +153,6 @@ public class HandGraspDetector : MonoBehaviour
         center = col.bounds.center;
 
         return true;
-    }
-
-    private void ThumbOpposedToFingerCheck()
-    {
-        if (thumbTip == null || thumbTip.fingerTipCollider == null) return;
-
-        foreach (var interactable in contactRegistry.GetTouches(thumbTip))
-        {
-            scoreState.SetThumbOppositionState(interactable, HasThumbOpposition(interactable));
-        }
     }
 
     private bool HasThumbOpposition(XRGrabInteractable interactable)
@@ -229,7 +188,7 @@ public class HandGraspDetector : MonoBehaviour
         if (!fingerContactEvent.Interactable) return;
         if (!DirectedIntoTheHand(fingerContactEvent)) return;
 
-        scoreState.AddScore(fingerContactEvent.Interactable, fingerContactEvent.Finger.touchScore);
+        TryGrasp(fingerContactEvent.Interactable);
 
         if (log) Debug.Log(fingerContactEvent.Finger.handFingerID + " is touching " + fingerContactEvent.OtherCollider.name + " from the correct side");
     }
@@ -241,9 +200,11 @@ public class HandGraspDetector : MonoBehaviour
         if (interactable == null) return;
 
         if (interactable == grabber.SelectedInteractable)
+        {
+            OnRelease?.Invoke(interactable);
             grabber.Release();
+        }
 
-        scoreState.RemoveInteractable(interactable);
         contactRegistry.RemoveInteractableEverywhere(interactable);
     }
 
@@ -263,36 +224,87 @@ public class HandGraspDetector : MonoBehaviour
         if (!fingerContactEvent.Interactable) return;
         if (!DirectedIntoTheHand(fingerContactEvent)) return;
 
-        scoreState.RemoveScore(fingerContactEvent.Interactable, fingerContactEvent.Finger.touchScore);
+        TryGrasp(fingerContactEvent.Interactable);
     }
 
-    private bool TryGrasp()
+    private bool TryGrasp(XRGrabInteractable interactable)
     {
-        var canditdate = scoreState.CurrentCandidate;
-
-        if(canditdate != null && scoreState.TryGetScore(canditdate, out var candidateScore) 
-            && candidateScore >= GRASP_SCORE_THRESHOLD)
+        if(CanGrab(interactable))
         {
-            if(grabber.TryGrab(canditdate))
+            if (grabber.SelectedInteractable == interactable)
+                return true;
+
+            if(grabber.TryGrab(interactable))
             {
-                OnGrap?.Invoke(canditdate);
+                OnGrab?.Invoke(interactable);
                 if (log) Debug.Log("Grasp condition was achived");
                 return true;
             }
+
+            return false;
         }
-
-        var selected = grabber.SelectedInteractable;
-
-        if(selected != null)
+        
+        if(grabber.SelectedInteractable == interactable)
         {
-            if(!scoreState.TryGetScore(selected, out var selectedScore) || selectedScore < RELEASE_SCORE_THRESHOLD)
-            {
-                OnRelease?.Invoke(selected);
-                grabber.Release();
-            }
+            OnRelease?.Invoke(interactable);
+            grabber.Release();
         }
 
         return false;
+    }
+
+    private bool CanGrab(XRGrabInteractable interactable)
+    {
+        if (interactable == null)
+            return false;
+
+        var e = GetGraspEvidence(interactable);
+
+        bool pinchGrab =
+            e.ThumbTouch &&
+            e.SupportingFingerTouches >= 1 &&
+            e.CurledSupportingFingers >= 1 &&
+            e.ThumbOpposed;
+
+        bool powerGrab =
+            e.NearPalm &&
+            e.SupportingFingerTouches >= 1 &&
+            e.CurledSupportingFingers >= 1 &&
+            (e.ThumbTouch || e.ThumbOpposed);
+
+        return pinchGrab || powerGrab;
+    }
+
+    private GraspEvidence GetGraspEvidence(XRGrabInteractable interactable)
+    {
+        int curledSupportingFingers = 0;
+        int supportingFingerTouches = 0;
+
+        foreach(var finger in contactRegistry.Fingers)
+        {
+            if (finger == null || finger == thumbTip)
+                continue;
+
+            if (!contactRegistry.IsTouching(finger, interactable))
+                continue;
+
+            supportingFingerTouches++;
+
+            if (IsFingerCurledEnough(finger))
+                curledSupportingFingers++;
+        }
+
+        return new GraspEvidence
+        {
+            ThumbTouch = thumbTip != null && contactRegistry.IsTouching(thumbTip, interactable),
+            SupportingFingerTouches = supportingFingerTouches,
+            CurledSupportingFingers = curledSupportingFingers,
+
+            NearPalm = IsNearPalm(interactable),
+            ThumbOpposed = HasThumbOpposition(interactable),
+
+            Interactable = interactable
+        };
     }
 
     private void OnDrawGizmosSelected()
@@ -328,8 +340,30 @@ public class FingerTouchData
     public int touchScore;
 
     public Vector3 insidePalmDirection;
+}
 
-    public bool isCurledEnough;
+
+public struct GraspEvidence
+{
+    public bool ThumbTouch;
+    public int SupportingFingerTouches;
+    public bool NearPalm;
+    public bool ThumbOpposed;
+    public int CurledSupportingFingers;
+
+    public XRGrabInteractable Interactable;
+
+    public GraspEvidence(bool thumbTouch, int supportingFingerTouches,
+        bool nearPalm, bool thumbOpposed, int curledSupportingFingers,
+        XRGrabInteractable interactable)
+    {
+        ThumbTouch = thumbTouch;
+        SupportingFingerTouches = supportingFingerTouches;
+        NearPalm = nearPalm;
+        ThumbOpposed = thumbOpposed;
+        CurledSupportingFingers = curledSupportingFingers;
+        Interactable = interactable;
+    }
 }
 
 public static class HandCurlProvider
