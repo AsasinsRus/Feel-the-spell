@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
@@ -14,10 +15,12 @@ public sealed class XRIHandGrabber
     {
         this.interactor = interactor;
 
-        attachPoint = new GameObject("Dynemic Attach Point").transform;
+        attachPoint = new GameObject("Dynamic Attach Point").transform;
         attachPoint.SetParent(hand, false);
 
         this.interactor.attachTransform = attachPoint;
+
+        interactor.selectExited.AddListener(OnSelectExited);
     }
 
     public bool IsHoldingSomething() => SelectedInteractable != null;
@@ -47,7 +50,10 @@ public sealed class XRIHandGrabber
             return false;
 
         var released = SelectedInteractable;
-        interactor.EndManualInteraction();
+        
+        if(released && interactor.interactablesSelected != null 
+            && interactor.interactablesSelected.Contains(released))
+            interactor.EndManualInteraction();
         SelectedInteractable = null;
 
         onRelease?.Invoke(released);
@@ -59,7 +65,7 @@ public sealed class XRIHandGrabber
         if (SelectedInteractable != interactable)
             return;
 
-        if (interactor)
+        if (interactor && SelectedInteractable)
             interactor.EndManualInteraction();
 
         SelectedInteractable = null;
@@ -69,5 +75,17 @@ public sealed class XRIHandGrabber
     {
         attachPoint.position = interactable.transform.position;
         attachPoint.rotation = interactable.transform.rotation;
+    }
+
+
+    private void OnSelectExited(SelectExitEventArgs args)
+    {
+        if (args.interactableObject == (IXRSelectInteractable)SelectedInteractable)
+            SelectedInteractable = null;
+    }
+
+    public void UnsubscribeInteractor()
+    {
+        interactor.selectExited.RemoveListener(OnSelectExited);
     }
 }

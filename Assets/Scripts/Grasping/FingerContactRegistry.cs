@@ -14,8 +14,8 @@ public sealed class FingerContactRegistry
     private readonly Dictionary<FingerTouchData, HashSet<XRGrabInteractable>> touchedByFinger = new();
     private readonly HashSet<XRGrabInteractable> destroyRegistered = new();
 
-    private Action<FingerContactEvent> onFingerTouch;
-    private Action<FingerContactEvent> onFingerUntouch;
+    public Action<FingerContactEvent> onFingerTouch;
+    public Action<FingerContactEvent> onFingerUntouch;
     private readonly UnityAction<GameObject> onInteractableDestroyed;
 
     public IEnumerable<FingerTouchData> Fingers => touchedByFinger.Keys;
