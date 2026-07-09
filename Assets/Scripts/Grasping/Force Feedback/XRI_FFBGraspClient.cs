@@ -14,6 +14,14 @@ public class XRI_FFBGraspClient : MonoBehaviour
     private HandGraspDetector handGraspDetector;
     [SerializeField]
     private Handedness handedness;
+    private static readonly XRHandFingerID[] FingerOrder =
+    {
+        XRHandFingerID.Thumb,
+        XRHandFingerID.Index,
+        XRHandFingerID.Middle,
+        XRHandFingerID.Ring,
+        XRHandFingerID.Little
+    };
 
     private XRHand CurrentHand 
         => handedness == Handedness.Left ? handSubsystem.leftHand : handSubsystem.rightHand;
@@ -32,11 +40,14 @@ public class XRI_FFBGraspClient : MonoBehaviour
 
     private void OnEnable()
     {
+        if(handGraspDetector == null)
+            return;
+
         handGraspDetector.OnGrab.AddListener(OnGrab);
         handGraspDetector.OnRelease.AddListener(OnRelease);
 
         handGraspDetector.AddOnTouch(_ApplyForceFeedback);
-        handGraspDetector.AddOnUntouch(_ApplyForceFeedback);
+        //handGraspDetector.AddOnUntouch(_ApplyForceFeedback);
     }
 
     private void OnDisable()
@@ -45,7 +56,7 @@ public class XRI_FFBGraspClient : MonoBehaviour
         handGraspDetector.OnRelease.RemoveListener(OnRelease);
 
         handGraspDetector.RemoveOnTouch(_ApplyForceFeedback);
-        //handGraspDetector.RemoveOnUntouch(_ApplyForceFeedback);
+        //andGraspDetector.RemoveOnUntouch(_ApplyForceFeedback);
     }
 
     private void OnGrab(XRGrabInteractable interactable)
@@ -68,10 +79,14 @@ public class XRI_FFBGraspClient : MonoBehaviour
     }
     private void ApplyForceFeedback()
     {
-        if(handedness == Handedness.Invalid || handSubsystem == null || !selected)
-            return;
+        if(handedness == Handedness.Invalid || handSubsystem == null || !selected || !CurrentHand.isTracked)
+        {
+            if(ffbManager != null && handSubsystem != null)
+            ffbManager.RelaxForceFeedback(CurrentHand);
 
-        ffbManager.SetForceFeedbackFromSkeleton(CurrentHand, GetTouchedMask(selected));  
+            return;
+        }
+        ffbManager.SetForceFeedbackFromXRHand(CurrentHand, GetTouchedMask(selected));  
     }
 
     private bool[] GetTouchedMask(XRGrabInteractable interactable)
@@ -81,9 +96,9 @@ public class XRI_FFBGraspClient : MonoBehaviour
         int i = 0;
         var _touched = handGraspDetector.Touched(interactable);
 
-        foreach (var finger in Enum.GetValues(typeof(XRHandFingerID)))
+        foreach (var finger in FingerOrder)
         {
-            if(_touched.Contains((XRHandFingerID)finger))
+            if(_touched.Contains(finger))
                 touched[i] = true;
 
             i++;
@@ -91,4 +106,6 @@ public class XRI_FFBGraspClient : MonoBehaviour
 
         return touched;
     }
+
+    
 }

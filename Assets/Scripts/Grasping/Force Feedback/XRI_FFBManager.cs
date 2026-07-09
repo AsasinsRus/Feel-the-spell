@@ -16,7 +16,7 @@ public class XRI_FFBManager : MonoBehaviour
     private XRI_FFBProvider ffbProviderRight;
 
     [Tooltip("Whether to inject the FFBProvider script into all interactable game objects")]
-    public bool injectFfbProvider = true;
+    public bool injectFfbProvider = false;
 
     private void Awake()
     {
@@ -49,7 +49,7 @@ public class XRI_FFBManager : MonoBehaviour
         }
     }
 
-    public void SetForceFeedbackFromSkeleton(XRHand hand, bool[] trackFinger = null)
+    public void SetForceFeedbackFromXRHand(XRHand hand, bool[] trackFinger = null)
     {
         if(!hand.isTracked)
             return;
@@ -178,8 +178,13 @@ class XRI_NamedPipesProvider
         try
         {
             Debug.Log("Connecting to pipe");
-            _pipe.Connect();
-            Debug.Log("Successfully connected to pipe");
+            _pipe.Connect(500);
+
+            if(_pipe.IsConnected)
+                Debug.Log("Successfully connected to pipe");
+            else
+                Debug.LogError("Cant connect to pipe");
+
         }
         catch
         {
