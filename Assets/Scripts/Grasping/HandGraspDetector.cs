@@ -9,12 +9,55 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Management;
 
+[Serializable]
+public class FingerTouchData
+{
+    public Collider fingerTipCollider;
+    public float fingerCurlThreshold;
+
+    public XRHandFingerID handFingerID;
+
+    public Vector3 insidePalmDirection;
+}
+
+public struct GraspEvidence
+{
+    public bool ThumbTouch;
+    public bool ThumbCurledEnough;
+    public int SupportingFingerTouches;
+    public bool NearPalm;
+
+    public bool ThumbOpposed;
+    public int CurledSupportingFingers;
+
+    public XRGrabInteractable Interactable;
+}
+
+public enum GrabMode
+{
+    NONE,
+    PINCH,
+    POWER
+}
+public struct HeldGraspState
+{
+    public XRGrabInteractable Interactable;
+    public GrabMode Mode;
+
+    public float ThumbCurl;
+
+    public FingerTouchData PrimarySupportFinger;
+    public float PrimarySupportFingerCurl;
+
+    public float InvalidSince;
+}
+
 public class HandGraspDetector : MonoBehaviour
 {
-    private const float ANGLE_TO_THE_PALM = 45f;
+    private const float ANGLE_TO_THE_PALM =  45f;
     private const float THUMB_OPPOSITION_ANGLE = 50f;
 
-    [Header("Hand info")]
+    [Header ("Hand info")]
     [SerializeField]
     private FingerTouchData thumbTip;
     [SerializeField]
@@ -30,14 +73,11 @@ public class HandGraspDetector : MonoBehaviour
     private XRHand CurrentHand => handedness == Handedness.Left ? handSubsystem.leftHand : handSubsystem.rightHand;
     [SerializeField]
     private Transform hand;
+
     [SerializeField]
     private Collider palm;
     [SerializeField]
     private float closeToPalmThreshold;
-
-    [Header("Interactions")]
-    [SerializeField]
-    private XRDirectInteractor interactor;
 
     [SerializeField]
     private float releaseGraceTime = .1f;
@@ -51,10 +91,12 @@ public class HandGraspDetector : MonoBehaviour
     [Header("Events")]
     [SerializeField]
     public UnityEvent<XRGrabInteractable> OnGrab;
+
+    [Header("Interactions")]
+    [SerializeField]
+    private XRDirectInteractor interactor;
     [SerializeField]
     public UnityEvent<XRGrabInteractable> OnRelease;
-
-    private XRHandSubsystem handSubsystem;
 
     private FingerContactRegistry contactRegistry;
     private XRIHandGrabber grabber;
@@ -65,6 +107,8 @@ public class HandGraspDetector : MonoBehaviour
     private HeldGraspState heldState;
     private bool hasHeldState;
 
+    private XRHandSubsystem handSubsystem;
+    
     private const int FRAMES_UNITL_NEXT_GRAB = 10;
     private int framesFromGrab = 0;
 
@@ -105,12 +149,6 @@ public class HandGraspDetector : MonoBehaviour
         return true;
     }
 
-    private void OnDestroy()
-    {
-        contactRegistry?.Unbind();
-        grabber?.UnsubscribeInteractor();
-    }
-
     private void Update()
     {
         framesFromGrab++;
@@ -133,6 +171,12 @@ public class HandGraspDetector : MonoBehaviour
             TryAcquireGrab();
     }
 
+    private void OnDestroy()
+    {
+        contactRegistry?.Unbind();
+        grabber?.UnsubscribeInteractor();
+    }
+
     private void TryAcquireGrab()
     {
         foreach (var interactable in contactRegistry.GetAllTouches())
@@ -143,14 +187,6 @@ public class HandGraspDetector : MonoBehaviour
                 return;
             }
         }
-    }
-
-    #region Checks
-    private bool IsFingerCurledEnough(FingerTouchData fingerTouchData)
-    {
-        HandCurlProvider.TryGetFingerCurl(CurrentHand, fingerTouchData.handFingerID, out float curl);
-
-        return curl >= fingerTouchData.fingerCurlThreshold;
     }
 
     private bool IsNearPalm(XRGrabInteractable interactable)
@@ -176,6 +212,28 @@ public class HandGraspDetector : MonoBehaviour
         center = col.bounds.center;
 
         return true;
+    }
+
+    #region Checks
+    private bool IsFingerCurledEnough(FingerTouchData fingerTouchData)
+    {
+        TryGetFingerCurl(CurrentHand, fingerTouchData.handFingerID, out float curl);
+
+        return curl >= fingerTouchData.fingerCurlThreshold;
+    }
+    public static bool TryGetFingerCurl(XRHand hand, XRHandFingerID fingerID, out float curl)
+    {
+        curl = 0f;
+
+        if (!hand.isTracked) return false;
+
+        var fingerShape = XRFingerShapeMath.CalculateFingerShape(
+            hand,
+            fingerID,
+            XRFingerShapeTypes.FullCurl
+            );
+
+        return fingerShape.TryGetFullCurl(out curl);
     }
 
     private bool HasThumbOpposition(XRGrabInteractable interactable)
@@ -205,15 +263,13 @@ public class HandGraspDetector : MonoBehaviour
 
         return false;
     }
-    private bool DirectedIntoTheHand(FingerContactEvent fingerContactEvent)
+
+    private void OnInteractableFingerUntouch(FingerContactEvent fingerContactEvent)
     {
-        Vector3 fingerPos = fingerContactEvent.Finger.fingerTipCollider.transform.position;
+        if (!fingerContactEvent.Interactable) return;
+        if (!DirectedIntoTheHand(fingerContactEvent)) return;
 
-        Vector3 toObject = fingerContactEvent.OtherCollider.bounds.center - fingerPos;
-        Vector3 inwardDirection = fingerContactEvent.Finger.fingerTipCollider.transform
-            .TransformDirection(fingerContactEvent.Finger.insidePalmDirection);
-
-        return Vector3.Angle(inwardDirection, toObject) <= ANGLE_TO_THE_PALM;
+        TryStartGrasp(fingerContactEvent.Interactable);
     }
 
     #endregion
@@ -243,13 +299,15 @@ public class HandGraspDetector : MonoBehaviour
 
         contactRegistry.RemoveInteractableEverywhere(interactable);
     }
-
-    private void OnInteractableFingerUntouch(FingerContactEvent fingerContactEvent)
+    private bool DirectedIntoTheHand(FingerContactEvent fingerContactEvent)
     {
-        if (!fingerContactEvent.Interactable) return;
-        if (!DirectedIntoTheHand(fingerContactEvent)) return;
+        Vector3 fingerPos = fingerContactEvent.Finger.fingerTipCollider.transform.position;
 
-        TryStartGrasp(fingerContactEvent.Interactable);
+        Vector3 toObject = fingerContactEvent.OtherCollider.bounds.center - fingerPos;
+        Vector3 inwardDirection = fingerContactEvent.Finger.fingerTipCollider.transform
+            .TransformDirection(fingerContactEvent.Finger.insidePalmDirection);
+
+        return Vector3.Angle(inwardDirection, toObject) <= ANGLE_TO_THE_PALM;
     }
     #endregion
 
@@ -263,9 +321,9 @@ public class HandGraspDetector : MonoBehaviour
         var mode = DetermineGrabMode(evidance);
         var primaryFinger = DeterminePrimarySupportFinger(interactable);
 
-        if (!HandCurlProvider.TryGetFingerCurl(CurrentHand, primaryFinger.handFingerID, out var primaryFingerCurl))
+        if (!TryGetFingerCurl(CurrentHand, primaryFinger.handFingerID, out var primaryFingerCurl))
             return false;
-        if (!HandCurlProvider.TryGetFingerCurl(CurrentHand, thumbTip.handFingerID, out var thumbCurl))
+        if (!TryGetFingerCurl(CurrentHand, thumbTip.handFingerID, out var thumbCurl))
             return false;
 
         if (!grabber.TryGrab(interactable))
@@ -322,9 +380,9 @@ public class HandGraspDetector : MonoBehaviour
 
         float palmDistance = Vector3.Distance(palm.bounds.center, center);
 
-        if (!HandCurlProvider.TryGetFingerCurl(CurrentHand, held.PrimarySupportFinger.handFingerID, out var currentPrimaryFingerCurl))
+        if (!TryGetFingerCurl(CurrentHand, held.PrimarySupportFinger.handFingerID, out var currentPrimaryFingerCurl))
             return false;
-        if (!HandCurlProvider.TryGetFingerCurl(CurrentHand, thumbTip.handFingerID, out var currentThumbCurl))
+        if (!TryGetFingerCurl(CurrentHand, thumbTip.handFingerID, out var currentThumbCurl))
             return false;
 
         bool thumbStillCurledEnough = held.ThumbCurl - releaseCurlDifference <= currentThumbCurl;
@@ -339,6 +397,18 @@ public class HandGraspDetector : MonoBehaviour
                 supportStillCurledEnough,
             _ => false
         };
+    }
+
+    private void ForceRelease()
+    {
+        var selected = grabber.SelectedInteractable;
+        if(selected)
+        {
+            OnRelease?.Invoke(selected);
+            grabber.Release();
+        }
+
+        hasHeldState = false;
     }
 
     private GrabMode DetermineGrabMode(GraspEvidence e)
@@ -390,18 +460,6 @@ public class HandGraspDetector : MonoBehaviour
         var e = GetGraspEvidence(interactable);
 
         return DetermineGrabMode(e) != GrabMode.NONE;
-    }
-
-    private void ForceRelease()
-    {
-        var selected = grabber.SelectedInteractable;
-        if(selected)
-        {
-            OnRelease?.Invoke(selected);
-            grabber.Release();
-        }
-
-        hasHeldState = false;
     }
 
     private GraspEvidence GetGraspEvidence(XRGrabInteractable interactable)
@@ -500,67 +558,4 @@ public class HandGraspDetector : MonoBehaviour
     }
 
     #endregion
-}
-
-[Serializable]
-public class FingerTouchData
-{
-    public Collider fingerTipCollider;
-    public float fingerCurlThreshold;
-
-    public XRHandFingerID handFingerID;
-
-    public int touchScore;
-
-    public Vector3 insidePalmDirection;
-}
-
-
-public struct GraspEvidence
-{
-    public bool ThumbTouch;
-    public bool ThumbCurledEnough;
-    public int SupportingFingerTouches;
-    public bool NearPalm;
-    public bool ThumbOpposed;
-    public int CurledSupportingFingers;
-
-    public XRGrabInteractable Interactable;
-}
-
-public enum GrabMode
-{
-    NONE,
-    PINCH,
-    POWER
-}
-public struct HeldGraspState
-{
-    public XRGrabInteractable Interactable;
-    public GrabMode Mode;
-
-    public float ThumbCurl;
-
-    public FingerTouchData PrimarySupportFinger;
-    public float PrimarySupportFingerCurl;
-
-    public float InvalidSince;
-}
-
-public static class HandCurlProvider
-{ 
-    public static bool TryGetFingerCurl(XRHand hand, XRHandFingerID fingerID, out float curl)
-    {
-        curl = 0f;
-
-        if(!hand.isTracked) return false;
-
-        var fingerShape = XRFingerShapeMath.CalculateFingerShape(
-            hand,
-            fingerID,
-            XRFingerShapeTypes.FullCurl
-            );
-
-        return fingerShape.TryGetFullCurl(out curl);
-    }
 }

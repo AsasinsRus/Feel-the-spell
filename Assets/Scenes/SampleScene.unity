@@ -1961,7 +1961,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a074f6eadb82c9248a82e0412f572632, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  injectFfbProvider: 1
+  injectFfbProvider: 0
 --- !u!4 &1009990281
 Transform:
   m_ObjectHideFlags: 0
@@ -4297,7 +4297,6 @@ MonoBehaviour:
   hand: {fileID: 686228121}
   palm: {fileID: 539591397}
   closeToPalmThreshold: 0.1
-  interactor: {fileID: 1324293137}
   releaseGraceTime: 0.1
   pinchHoldDistanceMultiplier: 1.6
   powerHoldDistanceMultiplier: 1.8
@@ -4305,6 +4304,7 @@ MonoBehaviour:
   OnGrab:
     m_PersistentCalls:
       m_Calls: []
+  interactor: {fileID: 1324293137}
   OnRelease:
     m_PersistentCalls:
       m_Calls: []
@@ -4939,7 +4939,6 @@ MonoBehaviour:
   hand: {fileID: 1649929390}
   palm: {fileID: 1182005761}
   closeToPalmThreshold: 0.1
-  interactor: {fileID: 1761054128}
   releaseGraceTime: 0.1
   pinchHoldDistanceMultiplier: 1.6
   powerHoldDistanceMultiplier: 1.8
@@ -4947,6 +4946,7 @@ MonoBehaviour:
   OnGrab:
     m_PersistentCalls:
       m_Calls: []
+  interactor: {fileID: 1761054128}
   OnRelease:
     m_PersistentCalls:
       m_Calls: []
@@ -5657,6 +5657,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 826937486}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2218496723442559054, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
+      insertIndex: 4
+      addedObject: {fileID: 2031797787}
     - targetCorrespondingSourceObject: {fileID: 4213253056565931907, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1649929391}
@@ -5856,6 +5859,23 @@ CapsuleCollider:
   m_Height: 0.02
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &2031797780 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2218496723442559054, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
+  m_PrefabInstance: {fileID: 1923033127}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2031797787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2031797780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5e0fa4aa83ddab49a8db783926d5c76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2033798967
 GameObject:
   m_ObjectHideFlags: 0
