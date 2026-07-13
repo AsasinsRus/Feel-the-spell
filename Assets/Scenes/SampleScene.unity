@@ -4228,7 +4228,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e58ec27d36cc1c64b844dec34f5c100f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.518
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e58ec27d36cc1c64b844dec34f5c100f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4266,6 +4266,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Standing 2H Magic Attack 01
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: e58ec27d36cc1c64b844dec34f5c100f, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: a7a537d7050c7d049a13b9c0652ffc51, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
