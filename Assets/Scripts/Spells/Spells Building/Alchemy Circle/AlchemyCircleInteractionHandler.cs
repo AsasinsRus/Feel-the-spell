@@ -174,7 +174,7 @@ public class AlchemyCircleInteractionHandler : MonoBehaviour
 
         item.KeepInPlace = false;
 
-        float handoffPoint = .75f;
+        //float handoffPoint = .75f;
         float splineLengt = spline.GetLength();
 
         float elapsed = 0f;

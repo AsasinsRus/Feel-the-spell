@@ -57,6 +57,8 @@ public class HandGraspDetector : MonoBehaviour
     private const float ANGLE_TO_THE_PALM =  45f;
     private const float THUMB_OPPOSITION_ANGLE = 50f;
 
+    private const int FRAMES_UNTIL_NEXT_GRAB = 10;
+
     [Header ("Hand info")]
     [SerializeField]
     private FingerTouchData thumbTip;
@@ -81,10 +83,10 @@ public class HandGraspDetector : MonoBehaviour
 
     [SerializeField]
     private float releaseGraceTime = .1f;
-    [SerializeField]
-    private float pinchHoldDistanceMultiplier = 1.6f;
-    [SerializeField]
-    private float powerHoldDistanceMultiplier = 1.8f;
+    //[SerializeField]
+    //private float pinchHoldDistanceMultiplier = 1.6f;
+    //[SerializeField]
+    //private float powerHoldDistanceMultiplier = 1.8f;
     [SerializeField]
     private float releaseCurlDifference = .1f;
 
@@ -109,7 +111,6 @@ public class HandGraspDetector : MonoBehaviour
 
     private XRHandSubsystem handSubsystem;
     
-    private const int FRAMES_UNITL_NEXT_GRAB = 10;
     private int framesFromGrab = 0;
 
     private void Awake()
@@ -167,7 +168,7 @@ public class HandGraspDetector : MonoBehaviour
         }
 
         // BUG: still taking items from inventory even if something is selected 
-        if (framesFromGrab >= FRAMES_UNITL_NEXT_GRAB)
+        if (framesFromGrab >= FRAMES_UNTIL_NEXT_GRAB)
             TryAcquireGrab();
     }
 
