@@ -103,14 +103,27 @@ public class AudioClient : MonoBehaviour
         
         isReading = true;
 
-        int bytesRead = await stream.ReadAsync(buffer);
-        if (bytesRead == 0) return;
+        try {
+            int bytesRead = await stream.ReadAsync(buffer);
+            if (bytesRead == 0) return;
 
-        string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-        Debug.Log($"Received: {message}");
+            string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            Debug.Log($"Received: {message}");
 
-        OnRecognition?.Invoke(message);
-        
-        isReading = false;
+            OnRecognition?.Invoke(message);
+        } finally {
+            isReading = false;
+        }
+    }
+
+    private void OnDestroy() {
+        client?.Close();
+
+        if (serverProcess != null && !serverProcess.HasExited) {
+            if (!serverProcess.WaitForExit(1000))
+                serverProcess.Kill();
+
+            serverProcess.Dispose();
+        }
     }
 }
