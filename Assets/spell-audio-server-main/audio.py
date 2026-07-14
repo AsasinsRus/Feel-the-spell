@@ -14,15 +14,23 @@ def all_audio_devices():
 
 class AudioAnalyzer:
 
-    def __init__(self, device: int | None, lang: str | None, single_word: bool = False):
+    def __init__(self, device: int | None, lang: str | None, single_word: bool = True):
         if device is None:
-            self._device = int(sd.query_devices("default")["index"])
+            try:
+                self._device = int(sd.query_devices("default")["index"])
+            except:
+                print("There is no default device! Please identify yours using --list-devices and then use it with --device X")
+                raise
         else:
             self._device = device
 
-        device_info = sd.query_devices(self._device, "input")
-        self._samplerate = int(device_info["default_samplerate"])
-            
+        try:
+            device_info = sd.query_devices(self._device, "input")
+            self._samplerate = int(device_info["default_samplerate"])
+        except e:
+            print("The selected device is not a valid input device!")
+            raise e
+
         if lang is None:
             self._model = Model(lang="en-us")
         else:
@@ -52,6 +60,8 @@ class AudioAnalyzer:
 
                 if wf:
                     self._last_words = []
+
+                    # Without this the stream does not get processed properly (partial never gets cleared)
                     result = rec.Result()
 
                     if not self._single_word:
@@ -67,15 +77,18 @@ class AudioAnalyzer:
                     j = json.loads(result)
                     text: str = j.get("partial", "")    
 
+                    if text == "":
+                        continue
+
                     initial_words = text.split(" ")
                     words = [w for w in initial_words]
 
                     for word in self._last_words:
-                        if len(words) == 0:
-                            break
-
                         if word == words[0]:
                             words.pop(0)
+
+                            if len(words) == 0:
+                                break
 
                     for word in words:
                         if word == "":
