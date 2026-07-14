@@ -18,6 +18,9 @@ public class XRI_FFBManager : MonoBehaviour
     [Tooltip("Whether to inject the FFBProvider script into all interactable game objects")]
     public bool injectFfbProvider = false;
 
+    XRI_VRFFBInput currentState;
+    bool hasCurrentState;
+
     private void Awake()
     {
         ffbProviderLeft = new XRI_FFBProvider(Handedness.Left);
@@ -49,7 +52,7 @@ public class XRI_FFBManager : MonoBehaviour
         }
     }
 
-    public void SetForceFeedbackFromXRHand(XRHand hand, bool[] trackFinger = null)
+    public void SetForceFeedbackFromXRHand(XRHand hand, short[] offsets, bool[] trackFinger = null)
     {
         if(!hand.isTracked)
             return;
@@ -58,23 +61,49 @@ public class XRI_FFBManager : MonoBehaviour
 
         if(trackFinger == null || trackFinger.Length != 5)
         {
-            thumb = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Thumb));
-            index = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Index));
-            middle = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Middle));
-            ring = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Ring));
-            little = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Little));
+            thumb = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Thumb), offsets[0]);
+            index = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Index), offsets[1]);
+            middle = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Middle), offsets[2]);
+            ring = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Ring), offsets[3]);
+            little = CurlToForce(GetFingerCurl(hand, XRHandFingerID.Little), offsets[4]);
         }
         else
         {
-            thumb = trackFinger[0] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Thumb)) : (short)0;
-            index = trackFinger[1] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Index)) : (short)0;
-            middle = trackFinger[2] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Middle)) : (short)0;
-            ring = trackFinger[3] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Ring)) : (short)0;
-            little = trackFinger[4] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Little)) : (short)0;
+            thumb = trackFinger[0] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Thumb), offsets[0]) : (short)0;
+            index = trackFinger[1] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Index), offsets[1]) : (short)0;
+            middle = trackFinger[2] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Middle), offsets[2]) : (short)0;
+            ring = trackFinger[3] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Ring), offsets[3]) : (short)0;
+            little = trackFinger[4] ? CurlToForce(GetFingerCurl(hand, XRHandFingerID.Little), offsets[4]) : (short)0;
         }
 
         
         var input = new XRI_VRFFBInput(thumb, index, middle, ring, little);
+
+
+        if(input.thumbCurl - currentState.thumbCurl >= 10)
+            currentState.thumbCurl = input.thumbCurl;
+        else
+            input.thumbCurl = currentState.thumbCurl;
+
+        if(input.indexCurl - currentState.indexCurl >= 10)
+            currentState.indexCurl = input.indexCurl;
+        else
+            input.indexCurl = currentState.indexCurl;
+
+        if(input.middleCurl - currentState.middleCurl >= 10)
+            currentState.middleCurl = input.middleCurl;
+        else
+            input.middleCurl = currentState.middleCurl;
+
+        if(input.ringCurl - currentState.ringCurl >= 10)
+            currentState.ringCurl = input.ringCurl;
+        else
+            input.ringCurl = currentState.ringCurl;
+
+        if(input.pinkyCurl - currentState.pinkyCurl >= 10)
+            currentState.pinkyCurl = input.pinkyCurl;
+        else
+            input.pinkyCurl = currentState.pinkyCurl;
 
         _SetForceFeedback(hand, input);
     }
@@ -90,8 +119,8 @@ public class XRI_FFBManager : MonoBehaviour
         return shape.TryGetFullCurl(out float curl) ? Mathf.Clamp01(curl) : 0f;
     }
 
-    private short CurlToForce(float curl)
-        => (short)Mathf.Clamp(Mathf.RoundToInt((1f - curl) * 1000), 0, 1000);
+    private short CurlToForce(float curl, short offset = 0)
+        => (short)(Mathf.Clamp(Mathf.RoundToInt((1f - curl) * 1000), 0, 1000) + offset);
     public void RelaxForceFeedback(XRHand hand)
     {
         XRI_VRFFBInput input = new XRI_VRFFBInput(0, 0, 0, 0, 0);

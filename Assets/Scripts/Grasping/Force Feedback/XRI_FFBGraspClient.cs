@@ -14,6 +14,8 @@ public class XRI_FFBGraspClient : MonoBehaviour
     private HandGraspDetector handGraspDetector;
     [SerializeField]
     private Handedness handedness;
+    [SerializeField]
+    private short[] offsets = {0,0,0,0,0};
     private static readonly XRHandFingerID[] FingerOrder =
     {
         XRHandFingerID.Thumb,
@@ -36,6 +38,8 @@ public class XRI_FFBGraspClient : MonoBehaviour
             .Manager?
             .activeLoader?
             .GetLoadedSubsystem<XRHandSubsystem>();   
+    
+    ffbManager.RelaxForceFeedback(CurrentHand);
     }
 
     private void OnEnable()
@@ -86,7 +90,7 @@ public class XRI_FFBGraspClient : MonoBehaviour
 
             return;
         }
-        ffbManager.SetForceFeedbackFromXRHand(CurrentHand, GetTouchedMask(selected));  
+        ffbManager.SetForceFeedbackFromXRHand(CurrentHand, offsets, GetTouchedMask(selected));  
     }
 
     private bool[] GetTouchedMask(XRGrabInteractable interactable)

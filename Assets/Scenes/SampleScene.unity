@@ -4267,31 +4267,26 @@ MonoBehaviour:
     fingerTipCollider: {fileID: 578019044}
     fingerCurlThreshold: 0.3
     handFingerID: 0
-    touchScore: 3
     insidePalmDirection: {x: -1, y: -0.3, z: 0.49}
   indexTip:
     fingerTipCollider: {fileID: 601727239}
     fingerCurlThreshold: 0.3
     handFingerID: 1
-    touchScore: 2
     insidePalmDirection: {x: 0, y: -1.72, z: -0.86}
   middleTip:
     fingerTipCollider: {fileID: 1606414840}
     fingerCurlThreshold: 0.3
     handFingerID: 2
-    touchScore: 2
     insidePalmDirection: {x: 0, y: -1.19, z: -0.64}
   ringTip:
     fingerTipCollider: {fileID: 191904679}
     fingerCurlThreshold: 0.3
     handFingerID: 3
-    touchScore: 2
     insidePalmDirection: {x: 0, y: -1, z: -0.69}
   pinkyTip:
     fingerTipCollider: {fileID: 11673532}
     fingerCurlThreshold: 0.3
     handFingerID: 4
-    touchScore: 2
     insidePalmDirection: {x: 0, y: -1, z: -0.73}
   handedness: 1
   hand: {fileID: 686228121}
@@ -4460,6 +4455,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   handGraspDetector: {fileID: 1324293136}
   handedness: 1
+  offsets: 9600c8005e01c8009600
 --- !u!1 &1342365390
 GameObject:
   m_ObjectHideFlags: 0
@@ -4909,31 +4905,26 @@ MonoBehaviour:
     fingerTipCollider: {fileID: 826937487}
     fingerCurlThreshold: 0.3
     handFingerID: 0
-    touchScore: 3
     insidePalmDirection: {x: 1, y: -0.3, z: 0.49}
   indexTip:
     fingerTipCollider: {fileID: 426778294}
     fingerCurlThreshold: 0.3
     handFingerID: 1
-    touchScore: 2
     insidePalmDirection: {x: 0, y: -1.72, z: -0.86}
   middleTip:
     fingerTipCollider: {fileID: 565841557}
     fingerCurlThreshold: 0.3
     handFingerID: 2
-    touchScore: 2
     insidePalmDirection: {x: 0, y: -1.19, z: -0.64}
   ringTip:
     fingerTipCollider: {fileID: 1988165315}
     fingerCurlThreshold: 0.3
     handFingerID: 3
-    touchScore: 2
     insidePalmDirection: {x: 0, y: -1, z: -0.69}
   pinkyTip:
     fingerTipCollider: {fileID: 2027927388}
     fingerCurlThreshold: 0.3
     handFingerID: 4
-    touchScore: 2
     insidePalmDirection: {x: 0, y: -1, z: -0.73}
   handedness: 2
   hand: {fileID: 1649929390}
@@ -5102,6 +5093,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   handGraspDetector: {fileID: 1761054127}
   handedness: 2
+  offsets: 96009600960096009600
 --- !u!1 &1799366174
 GameObject:
   m_ObjectHideFlags: 0
