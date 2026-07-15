@@ -2,6 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Creates visual effects of the alchemist circle
+/// </summary>
 public class AlchemyCircleVisual : MonoBehaviour
 {
     [SerializeField]

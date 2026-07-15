@@ -15,3 +15,4 @@ MonoBehaviour:
   _spells:
   - {fileID: 11400000, guid: 7590ab58d3794224b9c1c3b83b07cad2, type: 2}
   - {fileID: 11400000, guid: 9cecd018b0bc92944918516c709ab9e7, type: 2}
+  - {fileID: 11400000, guid: adc30471f95b96445b5271263a64814b, type: 2}
