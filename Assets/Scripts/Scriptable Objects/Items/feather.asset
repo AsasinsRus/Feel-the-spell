@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1dcf2a7c105704b4fa966018a3685da5, type: 3}
-  m_Name: Water
+  m_Name: Feather
   m_EditorClassIdentifier: 
-  itemName: Water
-  description: water
+  itemName: Feather
+  description: Phoenix feather
   prefab: {fileID: 1514182556830305907, guid: b490b4658eaf7a04cadba81049c790a2, type: 3}
