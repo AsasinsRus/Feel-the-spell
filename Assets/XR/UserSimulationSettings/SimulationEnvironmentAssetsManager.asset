@@ -9,9 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1dcf2a7c105704b4fa966018a3685da5, type: 3}
-  m_Name: Water
+  m_Script: {fileID: 11500000, guid: 378fb4eec0f59ac4c95c0d5b227aa85e, type: 3}
+  m_Name: SimulationEnvironmentAssetsManager
   m_EditorClassIdentifier: 
-  itemName: Water
-  description: water
-  prefab: {fileID: 8321704485811911821, guid: fbecb9b845866b84da6af06fc3e679e9, type: 3}
+  m_EnvironmentPrefabPaths: []
+  m_FallbackAtEndOfList: 0

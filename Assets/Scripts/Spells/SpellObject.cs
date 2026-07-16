@@ -1,12 +1,21 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
-
+/// <summary>
+/// Describes the spell.
+/// </summary>
 public class SpellObject : MonoBehaviour
 {
     [SerializeField]
     private SpellSO spellSO;
 
+    /// <summary>
+    /// Defines behaviour of the spell, for example the throwing behaviour.
+    /// </summary>
     private ISpellBehaviour behaviour;
+
+    /// <summary>
+    /// Stores all spell effects that occur when spell hits a target.
+    /// </summary>
     private IHitEffect[] hitEffects;
 
     protected XRBaseInteractable interactable;
@@ -25,6 +34,10 @@ public class SpellObject : MonoBehaviour
         interactable.selectExited.AddListener(args => behaviour.OnRelease(this, args));
     }
 
+    /// <summary>
+    /// Triggers all the hit effects on all the hit objects.
+    /// </summary>
+    /// <param name="colliders"></param>
     public void TriggerHit(Collider[] colliders)
     {
         foreach (Collider collider in colliders)

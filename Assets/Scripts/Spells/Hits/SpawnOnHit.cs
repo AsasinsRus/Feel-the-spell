@@ -1,5 +1,7 @@
 using UnityEngine;
-
+/// <summary>
+/// Spawns a game object (for example animation) after spell hits the target
+/// </summary>
 public class SpawnOnHit : MonoBehaviour, IHitEffect
 {
     [SerializeField]

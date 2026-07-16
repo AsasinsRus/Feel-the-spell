@@ -9,9 +9,12 @@ using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Gestures;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.XR.OpenXR;
 
 public class XRI_FFBManager : MonoBehaviour
 {
+    private const string STEAMVR = "SteamVR/OpenXR";
+
     private XRI_FFBProvider ffbProviderLeft;
     private XRI_FFBProvider ffbProviderRight;
 
@@ -23,6 +26,9 @@ public class XRI_FFBManager : MonoBehaviour
 
     private void Awake()
     {
+        if(OpenXRRuntime.name != STEAMVR)
+            return;
+
         ffbProviderLeft = new XRI_FFBProvider(Handedness.Left);
         ffbProviderRight = new XRI_FFBProvider(Handedness.Right);
 

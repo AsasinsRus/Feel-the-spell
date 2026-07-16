@@ -12,8 +12,15 @@ using Valve.VR.InteractionSystem;
 [RequireComponent(typeof(AlchemyCircleVisual)), RequireComponent(typeof(AlchemyCircleSlotLayout))]
 public class AlchemyCircleInteractionHandler : MonoBehaviour
 {
+    /// <summary>
+    /// The visual representation of a circle
+    /// </summary>
     [HideInInspector]
     public AlchemyCircleVisual visual;
+
+    /// <summary>
+    /// The slot layout of the objects on the circle
+    /// </summary>
     [HideInInspector]
     public AlchemyCircleSlotLayout slotLayout;
 

@@ -19,6 +19,6 @@ MonoBehaviour:
   materialComponents:
   - {fileID: 11400000, guid: ca987175072dce14eb024f304a060c39, type: 2}
   - {fileID: 11400000, guid: ca987175072dce14eb024f304a060c39, type: 2}
-  - {fileID: 11400000, guid: ca987175072dce14eb024f304a060c39, type: 2}
+  - {fileID: 11400000, guid: 3ecbb0dd0e7d31f4cbb044af16a8e219, type: 2}
   strictOrder: 0
   prefab: {fileID: 7264927644745550963, guid: 7c3d89d9b10ef9c4bb9908a2236be768, type: 3}
