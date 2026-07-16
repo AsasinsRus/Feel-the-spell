@@ -22,13 +22,9 @@ public class XRI_FFBManager : MonoBehaviour
     public bool injectFfbProvider = false;
 
     XRI_VRFFBInput currentState;
-    bool hasCurrentState;
 
     private void Awake()
     {
-        if(OpenXRRuntime.name != STEAMVR)
-            return;
-
         ffbProviderLeft = new XRI_FFBProvider(Handedness.Left);
         ffbProviderRight = new XRI_FFBProvider(Handedness.Right);
 

@@ -39,7 +39,7 @@ public class XRI_FFBGraspClient : MonoBehaviour
             .activeLoader?
             .GetLoadedSubsystem<XRHandSubsystem>();   
     
-    ffbManager.RelaxForceFeedback(CurrentHand);
+        ffbManager.RelaxForceFeedback(CurrentHand);
     }
 
     private void OnEnable()

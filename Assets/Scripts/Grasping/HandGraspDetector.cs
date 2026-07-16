@@ -52,6 +52,7 @@ public struct HeldGraspState
     public float InvalidSince;
 }
 
+[DefaultExecutionOrder(-100)]
 public class HandGraspDetector : MonoBehaviour
 {
     private const float ANGLE_TO_THE_PALM =  45f;
