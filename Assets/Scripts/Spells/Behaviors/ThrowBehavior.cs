@@ -10,14 +10,14 @@ public class ThrowBehavior : MonoBehaviour, ISpellBehaviour
     [SerializeField]
     private float hitCollisionRadius = 2.5f;
 
-    private SpellObject spell;
+    protected SpellObject spell;
 
     public void OnPickUp(SpellObject spell)
     {
         this.spell = spell;
     }
 
-    public void OnRelease(SpellObject spell, SelectExitEventArgs args)
+    public virtual void OnRelease(SpellObject spell, SelectExitEventArgs args)
     {
         spell.rb.useGravity = true;
         spell.rb.isKinematic = false;
@@ -25,15 +25,17 @@ public class ThrowBehavior : MonoBehaviour, ISpellBehaviour
         StartCoroutine(Boost(spell.rb));
     }
 
-    private IEnumerator Boost(Rigidbody rb)
+    protected IEnumerator Boost(Rigidbody rb)
     {
         yield return null;
 
         rb.linearVelocity *= forceMultiplier;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    protected void OnCollisionEnter(Collision collision)
     {
+        if(collision.gameObject.layer == LayerMask.NameToLayer("Hand")) return;
+
         var hits = Physics.OverlapSphere(transform.position, hitCollisionRadius);
 
         spell.TriggerHit(hits);
@@ -41,7 +43,7 @@ public class ThrowBehavior : MonoBehaviour, ISpellBehaviour
         Destroy(gameObject);
     }
 
-    private void OnDrawGizmos()
+    protected void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, hitCollisionRadius);

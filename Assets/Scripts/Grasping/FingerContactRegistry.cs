@@ -11,8 +11,8 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 public sealed class FingerContactRegistry
 {
     private readonly Dictionary<GameObject, FingerTouchData> fingerByColliderObject = new();
-    private readonly Dictionary<FingerTouchData, HashSet<XRGrabInteractable>> touchedByFinger = new();
-    private readonly HashSet<XRGrabInteractable> destroyRegistered = new();
+    private readonly Dictionary<FingerTouchData, HashSet<XRBaseInteractable>> touchedByFinger = new();
+    private readonly HashSet<XRBaseInteractable> destroyRegistered = new();
 
     public Action<FingerContactEvent> onFingerTouch;
     public Action<FingerContactEvent> onFingerUntouch;
@@ -69,7 +69,7 @@ public sealed class FingerContactRegistry
         if (!fingerByColliderObject.TryGetValue(source, out var finger))
             return;
 
-        var interactable = other.GetComponentInParent<XRGrabInteractable>();
+        var interactable = other.GetComponentInParent<XRBaseInteractable>();
         if (!interactable) return;
 
         if (touchedByFinger[finger].Add(interactable))
@@ -84,7 +84,7 @@ public sealed class FingerContactRegistry
         if (!fingerByColliderObject.TryGetValue(source, out var finger))
             return;
 
-        var interactable = other.GetComponentInParent<XRGrabInteractable>();
+        var interactable = other.GetComponentInParent<XRBaseInteractable>();
         if (!interactable) return;
 
         if (touchedByFinger[finger].Remove(interactable))
@@ -94,11 +94,11 @@ public sealed class FingerContactRegistry
     public bool TryGetFinger(GameObject colliderObject, out FingerTouchData finger)
         => fingerByColliderObject.TryGetValue(colliderObject, out finger);
 
-    public IReadOnlyCollection<XRGrabInteractable> GetTouches(FingerTouchData finger)
+    public IReadOnlyCollection<XRBaseInteractable> GetTouches(FingerTouchData finger)
         => touchedByFinger.TryGetValue(finger, out var interactables)
-        ? interactables.ToArray() : Array.Empty<XRGrabInteractable>();
+        ? interactables.ToArray() : Array.Empty<XRBaseInteractable>();
 
-    public bool AddTouch(FingerTouchData finger, XRGrabInteractable interactable)
+    public bool AddTouch(FingerTouchData finger, XRBaseInteractable interactable)
     {
         if(!touchedByFinger.TryGetValue(finger, out var interactables))
             return false;
@@ -106,7 +106,7 @@ public sealed class FingerContactRegistry
         return interactables.Add(interactable);
     }
 
-    public bool RemoveTouch(FingerTouchData finger, XRGrabInteractable interactable)
+    public bool RemoveTouch(FingerTouchData finger, XRBaseInteractable interactable)
     {
         if (!touchedByFinger.TryGetValue(finger, out var interactables))
             return false;
@@ -114,16 +114,16 @@ public sealed class FingerContactRegistry
         return interactables.Remove(interactable);
     }
 
-    public bool IsTouching(FingerTouchData finger, XRGrabInteractable interactable)
+    public bool IsTouching(FingerTouchData finger, XRBaseInteractable interactable)
         => touchedByFinger.TryGetValue(finger, out var interactables)
         && interactables.Contains(interactable);
 
-    public bool AnyFingerTouches(XRGrabInteractable interactable)
+    public bool AnyFingerTouches(XRBaseInteractable interactable)
         => touchedByFinger.Values.Any(interactables => interactables.Contains(interactable));
 
-    public HashSet<XRGrabInteractable> GetAllTouches()
+    public HashSet<XRBaseInteractable> GetAllTouches()
     {
-        HashSet<XRGrabInteractable> result = new HashSet<XRGrabInteractable>();
+        HashSet<XRBaseInteractable> result = new HashSet<XRBaseInteractable>();
 
         foreach (var interactables in touchedByFinger.Values)
             foreach(var interactable in interactables)
@@ -132,7 +132,7 @@ public sealed class FingerContactRegistry
         return result;
     }
 
-    public void RemoveInteractableEverywhere(XRGrabInteractable interactable)
+    public void RemoveInteractableEverywhere(XRBaseInteractable interactable)
     {
         destroyRegistered.Remove(interactable);
 
@@ -140,7 +140,7 @@ public sealed class FingerContactRegistry
             interactables.Remove(interactable);
     }
 
-    public void RegisterDestroy(XRGrabInteractable interactable)
+    public void RegisterDestroy(XRBaseInteractable interactable)
     {
         if (!destroyRegistered.Add(interactable))
             return;
@@ -156,10 +156,10 @@ public sealed class FingerContactRegistry
 public readonly struct FingerContactEvent
 {
     public FingerTouchData Finger { get; }
-    public XRGrabInteractable Interactable { get; }
+    public XRBaseInteractable Interactable { get; }
     public Collider OtherCollider { get; }
 
-    public FingerContactEvent(FingerTouchData finger, XRGrabInteractable interactable, Collider otherCollider)
+    public FingerContactEvent(FingerTouchData finger, XRBaseInteractable interactable, Collider otherCollider)
     {
         Finger = finger;
         Interactable = interactable;

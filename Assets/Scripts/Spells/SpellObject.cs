@@ -9,11 +9,11 @@ public class SpellObject : MonoBehaviour
     private ISpellBehaviour behaviour;
     private IHitEffect[] hitEffects;
 
-    private XRGrabInteractable interactable;
+    protected XRBaseInteractable interactable;
 
     private void Awake()
     {
-        interactable = GetComponent<XRGrabInteractable>();
+        interactable = GetComponent<XRBaseInteractable>();
         
         behaviour = GetComponent<ISpellBehaviour>();
         hitEffects = GetComponents<IHitEffect>();

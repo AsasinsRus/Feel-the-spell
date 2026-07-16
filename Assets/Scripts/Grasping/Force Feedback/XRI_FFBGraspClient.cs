@@ -28,7 +28,7 @@ public class XRI_FFBGraspClient : MonoBehaviour
     private XRHand CurrentHand 
         => handedness == Handedness.Left ? handSubsystem.leftHand : handSubsystem.rightHand;
 
-    private XRGrabInteractable selected;
+    private XRBaseInteractable selected;
     private XRHandSubsystem handSubsystem;
 
     private void Awake()
@@ -63,14 +63,14 @@ public class XRI_FFBGraspClient : MonoBehaviour
         //andGraspDetector.RemoveOnUntouch(_ApplyForceFeedback);
     }
 
-    private void OnGrab(XRGrabInteractable interactable)
+    private void OnGrab(XRBaseInteractable interactable)
     {
         selected = interactable;
 
         ApplyForceFeedback();
     }
 
-    private void OnRelease(XRGrabInteractable interactable)
+    private void OnRelease(XRBaseInteractable interactable)
     {
         selected = null;
 
@@ -93,7 +93,7 @@ public class XRI_FFBGraspClient : MonoBehaviour
         ffbManager.SetForceFeedbackFromXRHand(CurrentHand, offsets, GetTouchedMask(selected));  
     }
 
-    private bool[] GetTouchedMask(XRGrabInteractable interactable)
+    private bool[] GetTouchedMask(XRBaseInteractable interactable)
     {
         bool[] touched = new bool[5];
         

@@ -30,7 +30,7 @@ public struct GraspEvidence
     public bool ThumbOpposed;
     public int CurledSupportingFingers;
 
-    public XRGrabInteractable Interactable;
+    public XRBaseInteractable Interactable;
 }
 
 public enum GrabMode
@@ -41,7 +41,7 @@ public enum GrabMode
 }
 public struct HeldGraspState
 {
-    public XRGrabInteractable Interactable;
+    public XRBaseInteractable Interactable;
     public GrabMode Mode;
 
     public float ThumbCurl;
@@ -92,13 +92,13 @@ public class HandGraspDetector : MonoBehaviour
 
     [Header("Events")]
     [SerializeField]
-    public UnityEvent<XRGrabInteractable> OnGrab;
+    public UnityEvent<XRBaseInteractable> OnGrab;
 
     [Header("Interactions")]
     [SerializeField]
     private XRDirectInteractor interactor;
     [SerializeField]
-    public UnityEvent<XRGrabInteractable> OnRelease;
+    public UnityEvent<XRBaseInteractable> OnRelease;
 
     private FingerContactRegistry contactRegistry;
     private XRIHandGrabber grabber;
@@ -112,6 +112,8 @@ public class HandGraspDetector : MonoBehaviour
     private XRHandSubsystem handSubsystem;
     
     private int framesFromGrab = 0;
+
+    public HashSet<XRBaseInteractable> IgnoreInteractable { get; private set; }  = new();
 
     private void Awake()
     {
@@ -155,7 +157,7 @@ public class HandGraspDetector : MonoBehaviour
         framesFromGrab++;
 
         if (handSubsystem == null) return;
-        if (!CurrentHand.isTracked)
+        if (!CurrentHand.isTracked || IgnoreInteractable.Contains(grabber.SelectedInteractable))
         {
             ForceRelease();
             return;
@@ -167,7 +169,6 @@ public class HandGraspDetector : MonoBehaviour
             return;
         }
 
-        // BUG: still taking items from inventory even if something is selected 
         if (framesFromGrab >= FRAMES_UNTIL_NEXT_GRAB)
             TryAcquireGrab();
     }
@@ -190,7 +191,7 @@ public class HandGraspDetector : MonoBehaviour
         }
     }
 
-    private bool IsNearPalm(XRGrabInteractable interactable)
+    private bool IsNearPalm(XRBaseInteractable interactable)
     {
         if (!TryGetInteractableCenter(interactable, out var interactableCenter))
             return false;
@@ -201,7 +202,7 @@ public class HandGraspDetector : MonoBehaviour
         return distance <= closeToPalmThreshold;
     }
 
-    private bool TryGetInteractableCenter(XRGrabInteractable interactable, out Vector3 center)
+    private bool TryGetInteractableCenter(XRBaseInteractable interactable, out Vector3 center)
     {
         center = default;
 
@@ -237,7 +238,7 @@ public class HandGraspDetector : MonoBehaviour
         return fingerShape.TryGetFullCurl(out curl);
     }
 
-    private bool HasThumbOpposition(XRGrabInteractable interactable)
+    private bool HasThumbOpposition(XRBaseInteractable interactable)
     {
         if (!TryGetInteractableCenter(interactable, out var center))
             return false;
@@ -288,7 +289,7 @@ public class HandGraspDetector : MonoBehaviour
 
     private void OnInteractableDestroy(GameObject gameObject)
     {
-        var interactable = gameObject.GetComponent<XRGrabInteractable>();
+        var interactable = gameObject.GetComponent<XRBaseInteractable>();
 
         if (interactable == null) return;
 
@@ -313,9 +314,9 @@ public class HandGraspDetector : MonoBehaviour
     #endregion
 
     #region Grabbing
-    private bool TryStartGrasp(XRGrabInteractable interactable)
+    private bool TryStartGrasp(XRBaseInteractable interactable)
     {
-        if (!CanStartGrab(interactable))
+        if (!CanStartGrab(interactable) || IgnoreInteractable.Contains(interactable))
             return false;
 
         var evidance = GetGraspEvidence(interactable);
@@ -400,10 +401,11 @@ public class HandGraspDetector : MonoBehaviour
         };
     }
 
-    private void ForceRelease()
+    public void ForceRelease()
     {
         var selected = grabber.SelectedInteractable;
-        if(selected)
+
+        if (selected)
         {
             OnRelease?.Invoke(selected);
             grabber.Release();
@@ -434,7 +436,7 @@ public class HandGraspDetector : MonoBehaviour
         return GrabMode.NONE;
     }
 
-    private FingerTouchData DeterminePrimarySupportFinger(XRGrabInteractable interactable)
+    private FingerTouchData DeterminePrimarySupportFinger(XRBaseInteractable interactable)
     {
         FingerTouchData[] order = { indexTip, middleTip, ringTip, pinkyTip };
 
@@ -450,7 +452,7 @@ public class HandGraspDetector : MonoBehaviour
         return null;
     }
 
-    private bool CanStartGrab(XRGrabInteractable interactable)
+    private bool CanStartGrab(XRBaseInteractable interactable)
     {
         if (interactable == null)
             return false;
@@ -463,7 +465,7 @@ public class HandGraspDetector : MonoBehaviour
         return DetermineGrabMode(e) != GrabMode.NONE;
     }
 
-    private GraspEvidence GetGraspEvidence(XRGrabInteractable interactable)
+    private GraspEvidence GetGraspEvidence(XRBaseInteractable interactable)
     {
         int curledSupportingFingers = 0;
         int supportingFingerTouches = 0;
@@ -501,7 +503,7 @@ public class HandGraspDetector : MonoBehaviour
 
     #region Helpers
 
-    public HashSet<XRHandFingerID> Touched(XRGrabInteractable interactable)
+    public HashSet<XRHandFingerID> Touched(XRBaseInteractable interactable)
     {
         HashSet<XRHandFingerID> touchedBy = new();
 
@@ -533,6 +535,8 @@ public class HandGraspDetector : MonoBehaviour
     {
         contactRegistry.onFingerUntouch -= onUntouch;
     }
+    
+    public XRBaseInteractable SelectedInteractable => grabber?.SelectedInteractable;
 
     #endregion
 

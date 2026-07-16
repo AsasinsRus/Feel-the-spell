@@ -9,7 +9,7 @@ public sealed class XRIHandGrabber
     private readonly XRDirectInteractor interactor;
     private readonly Transform attachPoint;
 
-    public XRGrabInteractable SelectedInteractable { get; private set; }
+    public XRBaseInteractable SelectedInteractable { get; private set; }
 
     public XRIHandGrabber (XRDirectInteractor interactor, Transform hand)
     {
@@ -25,7 +25,7 @@ public sealed class XRIHandGrabber
 
     public bool IsHoldingSomething() => SelectedInteractable != null;
 
-    public bool TryGrab(XRGrabInteractable interactable, UnityEvent<XRGrabInteractable> onGrab = null)
+    public bool TryGrab(XRBaseInteractable interactable, UnityEvent<XRBaseInteractable> onGrab = null)
     {
         if (!interactor || !interactable)
             return false;
@@ -44,7 +44,7 @@ public sealed class XRIHandGrabber
         return true;
     }
 
-    public bool Release(UnityEvent<XRGrabInteractable> onRelease = null)
+    public bool Release(UnityEvent<XRBaseInteractable> onRelease = null)
     {
         if (!interactor || !SelectedInteractable)
             return false;
@@ -60,7 +60,7 @@ public sealed class XRIHandGrabber
         return true;
     }
 
-    public void ForceClearDestroyed(XRGrabInteractable interactable)
+    public void ForceClearDestroyed(XRBaseInteractable interactable)
     {
         if (SelectedInteractable != interactable)
             return;
@@ -71,7 +71,7 @@ public sealed class XRIHandGrabber
         SelectedInteractable = null;
     }
 
-    private void AllignAttachPointToInteractable(XRGrabInteractable interactable)
+    private void AllignAttachPointToInteractable(XRBaseInteractable interactable)
     {
         attachPoint.position = interactable.transform.position;
         attachPoint.rotation = interactable.transform.rotation;
