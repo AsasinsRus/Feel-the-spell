@@ -11,7 +11,7 @@
 
 ### Arguments
 
-- `s`/`--single-word` makes the server react faster to words and sends them word for word, but may get them wrong
+- `w`/`--whole-line` makes the server react only after a whole line has been spoken
 - `-l`/`--language`: Sets the language detected (for example. "en-us" or "de")
     - Default: "en-us"
 - `-d`/`--device`: Sets the input device to be used (either the index or substring of name)
@@ -22,3 +22,7 @@
 
 `OSError: PortAudio library not found`
 --> install libportaudio2 (ubuntu) / portaudio (fedora)
+
+## How to build
+
+Run `pyinstaller main.spec` or `python -m PyInstaller main.spec`
