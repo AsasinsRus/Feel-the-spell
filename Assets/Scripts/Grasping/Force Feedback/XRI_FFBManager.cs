@@ -11,10 +11,9 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.OpenXR;
 
+[DefaultExecutionOrder(-99)]
 public class XRI_FFBManager : MonoBehaviour
 {
-    private const string STEAMVR = "SteamVR/OpenXR";
-
     private XRI_FFBProvider ffbProviderLeft;
     private XRI_FFBProvider ffbProviderRight;
 

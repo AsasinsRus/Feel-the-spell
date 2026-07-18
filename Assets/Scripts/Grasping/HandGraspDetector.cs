@@ -324,6 +324,9 @@ public class HandGraspDetector : MonoBehaviour
         var mode = DetermineGrabMode(evidance);
         var primaryFinger = DeterminePrimarySupportFinger(interactable);
 
+        if(primaryFinger == null)
+            return false;
+
         if (!TryGetFingerCurl(CurrentHand, primaryFinger.handFingerID, out var primaryFingerCurl))
             return false;
         if (!TryGetFingerCurl(CurrentHand, thumbTip.handFingerID, out var thumbCurl))

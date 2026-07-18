@@ -1,6 +1,3 @@
-using System;
-using NUnit.Framework;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -38,14 +35,15 @@ public class XRI_FFBGraspClient : MonoBehaviour
             .Manager?
             .activeLoader?
             .GetLoadedSubsystem<XRHandSubsystem>();   
-    
-        ffbManager.RelaxForceFeedback(CurrentHand);
     }
 
     private void OnEnable()
     {
         if(handGraspDetector == null)
             return;
+
+        if(handSubsystem != null)
+            ffbManager.RelaxForceFeedback(CurrentHand);
 
         handGraspDetector.OnGrab.AddListener(OnGrab);
         handGraspDetector.OnRelease.AddListener(OnRelease);
@@ -56,6 +54,9 @@ public class XRI_FFBGraspClient : MonoBehaviour
 
     private void OnDisable()
     {
+        if (handSubsystem != null)
+            ffbManager.RelaxForceFeedback(CurrentHand);
+
         handGraspDetector.OnGrab.RemoveListener(OnGrab);
         handGraspDetector.OnRelease.RemoveListener(OnRelease);
 
@@ -110,6 +111,4 @@ public class XRI_FFBGraspClient : MonoBehaviour
 
         return touched;
     }
-
-    
 }
