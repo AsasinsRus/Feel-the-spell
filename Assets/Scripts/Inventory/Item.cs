@@ -21,6 +21,8 @@ public class Item : MonoBehaviour
     private Vector3 place;
     private Quaternion rotation;
 
+    public bool isInInventory = false;
+
     private bool keepInPlace = false;
     public bool KeepInPlace
     {

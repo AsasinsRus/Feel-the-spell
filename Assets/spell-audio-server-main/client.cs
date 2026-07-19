@@ -1,16 +1,22 @@
-using System.Net.Sockets;
-using System.Text;
 using System;
-using UnityEngine;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine;
+using UnityEngine.Events;
+using static Unity.VisualScripting.Icons;
 using Debug = UnityEngine.Debug;
-
 
 public class AudioClient : MonoBehaviour
 {
+    private const int HISTORY_LENGTH = 3;
+
     private Process serverProcess;
 
     private byte[] buffer = new byte[1024];
@@ -18,8 +24,9 @@ public class AudioClient : MonoBehaviour
     private TcpClient client;
     private NetworkStream stream => client.GetStream();
 
+    private Queue<string> history = new();
 
-    public event Action<string> OnRecognition;
+    public UnityEvent<string> OnRecognition;
 
     public static AudioClient Instance;
 
@@ -27,9 +34,25 @@ public class AudioClient : MonoBehaviour
     public int deviceId;
 
     [SerializeField]
+    private string deviceName;
+    [SerializeField, Tooltip("Just copy device name into \"Device Name\" field (if it's empty go to the 3 dots at right top and click on \"Refresh Microphones\")")]
+    private string[] availableDevices;
+
+    [SerializeField]
     public string language = "en-us";
 
     private bool isReading = false;
+
+
+
+#if UNITY_EDITOR
+    [ContextMenu("Refresh Microphones")]
+    public void RefreshMicrophones()
+    {
+        availableDevices = Microphone.devices;
+    }
+
+#endif
 
     private async Task StartServer() {
         string serverPath = Path.Combine(
@@ -37,6 +60,8 @@ public class AudioClient : MonoBehaviour
             "AudioServer",
             "server"
         );
+
+        deviceId = PythonMicFinder.FindDeviceIndex(serverPath, deviceName);
 
         serverProcess = new Process();
 
@@ -110,7 +135,11 @@ public class AudioClient : MonoBehaviour
             string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
             Debug.Log($"Received: {message}");
 
-            OnRecognition?.Invoke(message);
+            history.Enqueue(message);
+            if(history.Count > HISTORY_LENGTH)
+                history.Dequeue();
+
+            OnRecognition?.Invoke(HistoryAsString);
         } finally {
             isReading = false;
         }
@@ -125,5 +154,55 @@ public class AudioClient : MonoBehaviour
 
             serverProcess.Dispose();
         }
+    }
+
+    private string HistoryAsString => string.Join(" ", history);
+}
+
+public static class PythonMicFinder
+{ 
+    public static int FindDeviceIndex(string pythonExe, string micName)
+    {
+        var devices = GetDevicesRawList(pythonExe);
+
+        foreach (var rawLine in devices)
+        {
+            var line = rawLine.Trim();
+            
+            if(!line.Contains(micName))
+                continue;
+
+            if (!line.Contains("in, 0 out") && !line.Contains("in,"))
+                continue;
+
+            Match match = Regex.Match(line, @"^[><\s]*?(\d+)");
+            if(match.Success)
+                return int.Parse(match.Groups[1].Value);
+        }
+
+        return -1;
+    }
+
+    private static string[] GetDevicesRawList(string pythonExe)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = pythonExe,
+            Arguments = "--list-devices",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+        string output = process.StandardOutput.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        if(!string.IsNullOrWhiteSpace(error))
+            Debug.LogWarning(error);
+
+        return output.Split('\n');
     }
 }

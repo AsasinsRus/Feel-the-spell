@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System.Collections;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -107,7 +108,7 @@ public class InventorySlot : MonoBehaviour
         interactor.selectEntered.AddListener(AddItem);
         interactor.selectExited.AddListener(TakeItem);
 
-        if (interactor.attachTransform != null)
+        if (interactor.attachTransform != null && interactor.attachTransform.TryGetComponent<Item>(out _))
             AddItem(interactor.attachTransform.gameObject);
     }
 
@@ -145,6 +146,8 @@ public class InventorySlot : MonoBehaviour
             ScaleItem(Item);
 
         inventory.AddItem(InventoryIndex);
+
+        Item.GetComponent<Item>().isInInventory = true;
     }
 
     private void ScaleItem(GameObject item)
@@ -197,14 +200,18 @@ public class InventorySlot : MonoBehaviour
         if (infinite)
         {
             //StartCoroutine(RegenarateItem(Item.transform));
-
-            RegenarateItem(Item);
+            var oldItem = Item;
+            Item = RegenarateItem(Item);
+            
+            oldItem.GetComponent<Item>().isInInventory = false;
         }
         else
         {
+            Item.GetComponent<Item>().isInInventory = false;
             Item = null;
             inventory.RemoveItem();
         }
+
     }
 
     private IEnumerator RegenarateItem(Transform takenItem)
@@ -218,13 +225,15 @@ public class InventorySlot : MonoBehaviour
         Item = Instantiate(item, transform.position, transform.rotation);
     }
 
-    private void RegenarateItem(GameObject takenItem)
+    private GameObject RegenarateItem(GameObject takenItem)
     {
-        var newItem = Instantiate(takenItem, transform.position, transform.rotation).GetComponent<Collider>();
+        var newItem = Instantiate(takenItem, transform.position, transform.rotation);
 
-        Physics.IgnoreCollision(newItem, takenItem.GetComponent<Collider>());
+        Physics.IgnoreCollision(newItem.GetComponent<Collider>(), takenItem.GetComponent<Collider>());
 
-        StartCoroutine(DisableCollisionIgnore(takenItem.GetComponent<Collider>(), newItem));
+        StartCoroutine(DisableCollisionIgnore(takenItem.GetComponent<Collider>(), newItem.GetComponent<Collider>()));
+
+        return newItem;
     }
 
     private IEnumerator DisableCollisionIgnore(Collider takenItem, Collider newItem)
@@ -233,6 +242,7 @@ public class InventorySlot : MonoBehaviour
         {
             yield return null;
         }
+        if(takenItem == null || newItem == null) yield break;
 
         Physics.IgnoreCollision(newItem, takenItem.GetComponent<Collider>(), false);
     }

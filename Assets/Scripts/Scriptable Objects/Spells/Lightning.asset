@@ -22,3 +22,56 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a34b0fd3b862f8c4c8b616f431297e72, type: 2}
   strictOrder: 0
   prefab: {fileID: 178460, guid: 2736bbc2f2c78a949957b0719c2992bd, type: 3}
+  vibrationPattern:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.0042643845
+      value: 0.60613215
+      inSlope: -1.7411338
+      outSlope: -1.7411338
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.11940298
+      value: 0.40566045
+      inSlope: -1.7411338
+      outSlope: 0.56977254
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.48908424
+      value: 0.6162947
+      inSlope: 0.56977254
+      outSlope: -1.1530799
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.71428627
+      value: 0.35661876
+      inSlope: -1.1530799
+      outSlope: 0.860456
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1.0042644
+      value: 0.60613215
+      inSlope: 0.860456
+      outSlope: 0.860456
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 1
+    m_RotationOrder: 4
+  duration: 0.4
+  loop: 1

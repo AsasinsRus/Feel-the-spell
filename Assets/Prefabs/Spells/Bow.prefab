@@ -81,9 +81,9 @@ LineRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Positions:
-  - {x: 0.15, y: 0.8, z: 0}
+  - {x: 0.15, y: 0.5, z: 0}
   - {x: 0.15, y: 0, z: 0}
-  - {x: 0.15, y: -0.8, z: 0}
+  - {x: 0.15, y: -0.5, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.005
@@ -221,8 +221,8 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 3154402677339908296}
         m_TargetAssemblyTypeName: BowBehavior, Assembly-CSharp
-        m_MethodName: 
-        m_Mode: 1
+        m_MethodName: ReleaseSecondHand
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -331,13 +331,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 726753425324786953}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7777169439263416400}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!120 &2551493980093240104
 LineRenderer:
   serializedVersion: 2
@@ -385,7 +385,7 @@ LineRenderer:
   m_SortingOrder: -1
   m_Positions:
   - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 3.01}
+  - {x: 5, y: 0, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -393,8 +393,8 @@ LineRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0.030241936
-        value: 0.12280758
+        time: 0.02419367
+        value: 0.2807071
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -470,13 +470,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 941761393146882706}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7777169439263416400}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!120 &1167460494333946188
 LineRenderer:
   serializedVersion: 2
@@ -524,7 +524,7 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 3.01}
+  - {x: 5, y: 0, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -532,8 +532,8 @@ LineRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0.03427407
-        value: 0.070164755
+        time: 0.028223962
+        value: 0.1447192
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -5499,7 +5499,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2889043776256124370}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -5515,7 +5515,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 4549dedd387334a48a96b3817dc61c27, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7752,7 +7752,7 @@ ParticleSystem:
     x:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.82
+      scalar: 1
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -9493,13 +9493,13 @@ ParticleSystem:
         m_RotationOrder: 4
     maxLights: 20
   TrailModule:
-    enabled: 0
+    enabled: 1
     mode: 0
     ratio: 1
     lifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.38
+      scalar: 0.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -9549,7 +9549,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    minVertexDistance: 0.2
+    minVertexDistance: 1
     textureMode: 0
     textureScale: {x: 1, y: 1}
     ribbonCount: 1
@@ -9637,22 +9637,22 @@ ParticleSystem:
         m_Curve:
         - serializedVersion: 3
           time: 0
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          value: 0
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
-          inWeight: 0.33333334
+          inWeight: 0
           outWeight: 0.33333334
         - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          time: 0.93536377
+          value: 0.338583
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
           inWeight: 0.33333334
-          outWeight: 0.33333334
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -10349,6 +10349,7 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
+  - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10415,6 +10416,7 @@ GameObject:
   - component: {fileID: 8548117260522330670}
   - component: {fileID: 3154402677339908296}
   - component: {fileID: 5451500578408525140}
+  - component: {fileID: 2496185792726174947}
   m_Layer: 7
   m_Name: Bow
   m_TagString: Untagged
@@ -10455,7 +10457,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -10469,9 +10471,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 1
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &9156922593033643970
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10621,9 +10623,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   forceMultiplier: 2.5
-  hitCollisionRadius: 1.05
+  hitCollisionRadius: 0.09
+  maxLaunchForce: 7
   rightHand: {fileID: 0}
   leftHand: {fileID: 0}
+  pullThreashold: 0.4
 --- !u!114 &5451500578408525140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10636,6 +10640,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dd50bd0300a0c64ab06c37f8733a3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2496185792726174947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4205003793178307197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e24b369bdf223994cb0f8c726c9516fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _bowParticles:
+  - {fileID: 7585712252115733664}
+  - {fileID: 107058086194687713}
+  - {fileID: 1129641437744132628}
+  - {fileID: 6656566496099104250}
+  - {fileID: 2196420164969686263}
+  - {fileID: 4752333844177459464}
+  _maxPulledRotationSpeed: {x: 40, y: 25, z: 0}
+  _lines:
+  - {fileID: 2551493980093240104}
+  - {fileID: 1167460494333946188}
+  _startPoint: {fileID: 18974750143694386}
+  _endPoint: {fileID: 2226381320898495035}
+  pullThreashold: 0.4
 --- !u!1 &5032997740081785559
 GameObject:
   m_ObjectHideFlags: 0
@@ -12829,7 +12859,7 @@ ParticleSystem:
     x:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.82
+      scalar: 1
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -14570,13 +14600,13 @@ ParticleSystem:
         m_RotationOrder: 4
     maxLights: 20
   TrailModule:
-    enabled: 0
+    enabled: 1
     mode: 0
     ratio: 1
     lifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.38
+      scalar: 0.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -14626,7 +14656,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    minVertexDistance: 0.2
+    minVertexDistance: 1
     textureMode: 0
     textureScale: {x: 1, y: 1}
     ribbonCount: 1
@@ -14714,22 +14744,22 @@ ParticleSystem:
         m_Curve:
         - serializedVersion: 3
           time: 0
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          value: 0
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
-          inWeight: 0.33333334
+          inWeight: 0
           outWeight: 0.33333334
         - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          time: 0.93536377
+          value: 0.338583
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
           inWeight: 0.33333334
-          outWeight: 0.33333334
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -15426,6 +15456,7 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 5fb5bd5c132f8b04fbad6f01b02fb078, type: 2}
+  - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -17733,7 +17764,7 @@ ParticleSystem:
     x:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.82
+      scalar: 1
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -19474,13 +19505,13 @@ ParticleSystem:
         m_RotationOrder: 4
     maxLights: 20
   TrailModule:
-    enabled: 0
+    enabled: 1
     mode: 0
     ratio: 1
     lifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.38
+      scalar: 0.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -19530,7 +19561,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    minVertexDistance: 0.2
+    minVertexDistance: 1
     textureMode: 0
     textureScale: {x: 1, y: 1}
     ribbonCount: 1
@@ -19618,22 +19649,22 @@ ParticleSystem:
         m_Curve:
         - serializedVersion: 3
           time: 0
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          value: 0
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
-          inWeight: 0.33333334
+          inWeight: 0
           outWeight: 0.33333334
         - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          time: 0.93536377
+          value: 0.338583
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
           inWeight: 0.33333334
-          outWeight: 0.33333334
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -20330,6 +20361,7 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
+  - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -20406,13 +20438,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5766416218857167288}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8501798191702656496}
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6472790956341531702
 GameObject:
   m_ObjectHideFlags: 0
@@ -22606,7 +22638,7 @@ ParticleSystem:
     x:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.82
+      scalar: 1
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -24347,13 +24379,13 @@ ParticleSystem:
         m_RotationOrder: 4
     maxLights: 20
   TrailModule:
-    enabled: 0
+    enabled: 1
     mode: 0
     ratio: 1
     lifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.38
+      scalar: 0.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -24403,7 +24435,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    minVertexDistance: 0.2
+    minVertexDistance: 1
     textureMode: 0
     textureScale: {x: 1, y: 1}
     ribbonCount: 1
@@ -24491,22 +24523,22 @@ ParticleSystem:
         m_Curve:
         - serializedVersion: 3
           time: 0
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          value: 0
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
-          inWeight: 0.33333334
+          inWeight: 0
           outWeight: 0.33333334
         - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          time: 0.93536377
+          value: 0.338583
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
           inWeight: 0.33333334
-          outWeight: 0.33333334
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -25202,6 +25234,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
+  - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
   - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -32284,7 +32317,7 @@ ParticleSystem:
     x:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.82
+      scalar: 1
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -34025,13 +34058,13 @@ ParticleSystem:
         m_RotationOrder: 4
     maxLights: 20
   TrailModule:
-    enabled: 0
+    enabled: 1
     mode: 0
     ratio: 1
     lifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.38
+      scalar: 0.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -34081,7 +34114,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    minVertexDistance: 0.2
+    minVertexDistance: 1
     textureMode: 0
     textureScale: {x: 1, y: 1}
     ribbonCount: 1
@@ -34169,22 +34202,22 @@ ParticleSystem:
         m_Curve:
         - serializedVersion: 3
           time: 0
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          value: 0
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
-          inWeight: 0.33333334
+          inWeight: 0
           outWeight: 0.33333334
         - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          time: 0.93536377
+          value: 0.338583
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
           inWeight: 0.33333334
-          outWeight: 0.33333334
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -34881,6 +34914,7 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 5fb5bd5c132f8b04fbad6f01b02fb078, type: 2}
+  - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -39794,7 +39828,7 @@ Transform:
   m_GameObject: {fileID: 7973541877411003010}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.00999999, y: -0.018999934, z: 0.013999999}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -41995,7 +42029,7 @@ ParticleSystem:
     x:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.82
+      scalar: 1
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -43736,13 +43770,13 @@ ParticleSystem:
         m_RotationOrder: 4
     maxLights: 20
   TrailModule:
-    enabled: 0
+    enabled: 1
     mode: 0
     ratio: 1
     lifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.38
+      scalar: 0.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -43792,7 +43826,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    minVertexDistance: 0.2
+    minVertexDistance: 1
     textureMode: 0
     textureScale: {x: 1, y: 1}
     ribbonCount: 1
@@ -43880,22 +43914,22 @@ ParticleSystem:
         m_Curve:
         - serializedVersion: 3
           time: 0
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          value: 0
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
-          inWeight: 0.33333334
+          inWeight: 0
           outWeight: 0.33333334
         - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
+          time: 0.93536377
+          value: 0.338583
+          inSlope: 0.36198002
+          outSlope: 0.36198002
+          tangentMode: 34
           weightedMode: 0
           inWeight: 0.33333334
-          outWeight: 0.33333334
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -44591,6 +44625,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
+  - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
   - {fileID: 2100000, guid: e918a93e165eca44ebbd20262fca4196, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0

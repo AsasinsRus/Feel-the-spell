@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEditor.XR.Interaction.Toolkit.Inputs.Readers;
 
 public class SpellBuilder : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class SpellBuilder : MonoBehaviour
 
     [HideInInspector]
     public GameObject lastCreatedSpell;
+
+    public bool HasSpell => lastCreatedSpell != null;
 
     private Dictionary<string, SpellSO> commandToSpell = new();
 
@@ -35,7 +38,7 @@ public class SpellBuilder : MonoBehaviour
 
         foreach(var spell in SpellsRegistry.Instance.Spells)
         {
-            commandToSpell.Add(spell.spellActivationCommand, spell);
+            commandToSpell.Add(spell.spellActivationCommand.ToLower(), spell);
         }
     }
 
@@ -44,9 +47,24 @@ public class SpellBuilder : MonoBehaviour
     /// </summary>
     /// <param name="spellCastingCommand">Spell to cast</param>
     /// <returns>true - if spell was casted, false - otherwise</returns>
-    public bool TryBuildSpell(string spellCastingCommand)
+    public bool TryBuildSpell(string history)
     {
-        if(!commandToSpell.TryGetValue(spellCastingCommand, out SpellSO spellSO)) return false;
+        SpellSO spellSO = default;
+        string spellCastingCommand = default;
+
+        if (history == "") return false;
+
+        foreach (var spellCastingCommandCandidate in GetSpellCastingCommandCandidates(history))
+        {
+            if (commandToSpell.TryGetValue(spellCastingCommandCandidate, out spellSO)) 
+            {
+                spellCastingCommand = spellCastingCommandCandidate;
+                break;
+            }
+        }
+
+        if (spellSO == default) return false;
+        
         if (!HasAllComponents(spellSurface, commandToSpell[spellCastingCommand])) return false;
 
         if (lastCreatedSpell)
@@ -58,6 +76,17 @@ public class SpellBuilder : MonoBehaviour
         Debug.Log("Creted " + spellSO.spellName);
 
         return true;
+    }
+
+    private string[] GetSpellCastingCommandCandidates(string history)
+    {
+        string[] words = history.Split(' ');
+
+        string[] candidates = new string[words.Length];
+        for(int i = 0; i < candidates.Length; i++)
+            candidates[i] = string.Join(" ", words.Skip(i));
+
+        return candidates;
     }
 
     public bool TryDestroyCreatedSpell()

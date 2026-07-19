@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 /// <summary>
 /// Describes the spell.
@@ -20,6 +22,9 @@ public class SpellObject : MonoBehaviour
 
     protected XRBaseInteractable interactable;
 
+    private HapticImpulsePlayer hapticImpulsePlayer;
+    private VibrationProvider vibrationProvider;
+
     private void Awake()
     {
         interactable = GetComponent<XRBaseInteractable>();
@@ -32,6 +37,35 @@ public class SpellObject : MonoBehaviour
 
         interactable.selectEntered.AddListener(args => behaviour.OnPickUp(this));
         interactable.selectExited.AddListener(args => behaviour.OnRelease(this, args));
+
+        interactable.selectEntered.AddListener(ActivateVibration);
+        interactable.selectExited.AddListener(args => DisactivateVibration());
+    }
+
+    private void Update()
+    {
+        vibrationProvider?.Update();
+    }
+
+    private void ActivateVibration(SelectEnterEventArgs args)
+    {
+        hapticImpulsePlayer = args.interactorObject.transform.GetComponentInParent<HapticImpulsePlayer>()
+            ?? args.interactorObject.transform.GetComponentInChildren<HapticImpulsePlayer>();
+
+        if (hapticImpulsePlayer != null)
+            vibrationProvider = new VibrationProvider
+                (
+                    spellSO.vibrationPattern,
+                    spellSO.duration,
+                    spellSO.loop,
+                    new HapticImpulsePlayer[] { hapticImpulsePlayer }
+                );
+    }
+
+    private void DisactivateVibration()
+    {
+        hapticImpulsePlayer = null;
+        vibrationProvider = null;
     }
 
     /// <summary>

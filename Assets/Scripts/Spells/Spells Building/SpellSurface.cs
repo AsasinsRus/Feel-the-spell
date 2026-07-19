@@ -16,6 +16,9 @@ public class SpellSurface : MonoBehaviour
     [HideInInspector]
     public AlchemyCircleInteractionHandler circleInteractionHandler;
 
+    [SerializeField]
+    private bool useSpeechRecognition = true;
+
     private void Awake()
     {
         circleInteractionHandler = GetComponent<AlchemyCircleInteractionHandler>();
@@ -23,25 +26,75 @@ public class SpellSurface : MonoBehaviour
 
     private void OnEnable()
     {
-        movementRecognizer.OnRecognition.AddListener(OnRecognition);
+        if(movementRecognizer != null)
+            movementRecognizer.OnRecognition.AddListener(OnRecognition);
 
-        circleInteractionHandler.OnAnimationEnd += AddItem;
-        circleInteractionHandler.AfterItemGrabbed += RemoveItem;
+        if(circleInteractionHandler != null)
+        {
+            circleInteractionHandler.OnAnimationEnd += AddItem;
+            circleInteractionHandler.AfterItemGrabbed += RemoveItem;
+        }
 
-        AudioClient.Instance.OnRecognition += OnRecognition;
+        RefreshBinding();
     }
 
     private void OnRecognition(string message)
     {
-        circleInteractionHandler.visual.SetSpellReady(SpellBuilder.instance.TryBuildSpell(message));
+        if(!SpellBuilder.instance.HasSpell)
+            circleInteractionHandler.visual.SetSpellReady(SpellBuilder.instance.TryBuildSpell(message));
+    }
+
+    private void TryBuildSpell(Item item)
+    {
+        circleInteractionHandler.visual.SetSpellReady(SpellBuilder.instance.TryBuildSpell());
+    }
+
+    private void OnValidate()
+    {
+        if(!Application.isPlaying)
+            return;
+
+        RefreshBinding();
+    }
+
+    private void RefreshBinding()
+    {
+        if (circleInteractionHandler == null) return;
+        
+        if (AudioClient.Instance != null)
+            AudioClient.Instance.OnRecognition.RemoveListener(OnRecognition);
+
+        circleInteractionHandler.OnAnimationEnd -= TryBuildSpell;
+        circleInteractionHandler.AfterItemGrabbed -= TryBuildSpell;
+
+        if (useSpeechRecognition)
+        {
+            if(AudioClient.Instance != null)
+                AudioClient.Instance.OnRecognition.AddListener(OnRecognition);
+        }
+        else
+        {
+            circleInteractionHandler.OnAnimationEnd += TryBuildSpell;
+            circleInteractionHandler.AfterItemGrabbed += TryBuildSpell;
+        }
     }
 
     private void OnDisable()
     {
-        movementRecognizer.OnRecognition.RemoveListener(OnRecognition);
+        if(movementRecognizer != null)
+            movementRecognizer.OnRecognition.RemoveListener(OnRecognition);
 
-        circleInteractionHandler.OnAnimationEnd -= AddItem;
-        circleInteractionHandler.AfterItemGrabbed -= RemoveItem;
+        if (AudioClient.Instance != null)
+            AudioClient.Instance.OnRecognition.RemoveListener(OnRecognition);
+
+        if(circleInteractionHandler != null)
+        {
+            circleInteractionHandler.OnAnimationEnd -= AddItem;
+            circleInteractionHandler.AfterItemGrabbed -= RemoveItem;
+
+            circleInteractionHandler.OnAnimationEnd -= TryBuildSpell;
+            circleInteractionHandler.AfterItemGrabbed -= TryBuildSpell;
+        }
     }
 
     private void OnRecognition(string gestureClass, Vector3[] points)

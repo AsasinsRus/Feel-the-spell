@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Splines;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using Valve.VR.InteractionSystem;
 
 [RequireComponent(typeof(AlchemyCircleVisual)), RequireComponent(typeof(AlchemyCircleSlotLayout))]
@@ -59,7 +60,10 @@ public class AlchemyCircleInteractionHandler : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!visual.isCircleVisible) return;
+        
         if (!other.TryGetComponent<Item>(out var item)) return;
+        if (item.isInInventory) return;
+
         if (slotLayout.Contains(item)) return;
         if (!other.TryGetComponent<XRGrabInteractable>(out var interactable)) return;
         
