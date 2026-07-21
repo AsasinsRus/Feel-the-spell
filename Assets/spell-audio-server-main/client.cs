@@ -17,6 +17,12 @@ public class AudioClient : MonoBehaviour
 {
     private const int HISTORY_LENGTH = 3;
 
+    public static string serverPath = Path.Combine(
+            Application.streamingAssetsPath,
+            "AudioServer",
+            "server"
+        );
+
     private Process serverProcess;
 
     private byte[] buffer = new byte[1024];
@@ -43,6 +49,10 @@ public class AudioClient : MonoBehaviour
 
     private bool isReading = false;
 
+    public string DeviceName => deviceName;
+
+    public bool IsSwitchingDevice { get; private set; } = false;
+
 
 
 #if UNITY_EDITOR
@@ -55,12 +65,6 @@ public class AudioClient : MonoBehaviour
 #endif
 
     private async Task StartServer() {
-        string serverPath = Path.Combine(
-            Application.streamingAssetsPath,
-            "AudioServer",
-            "server"
-        );
-
         deviceId = PythonMicFinder.FindDeviceIndex(serverPath, deviceName);
 
         serverProcess = new Process();
@@ -90,6 +94,8 @@ public class AudioClient : MonoBehaviour
         serverProcess.Start();
         serverProcess.BeginOutputReadLine();
         serverProcess.BeginErrorReadLine();
+
+        Debug.Log(serverProcess.Id);
 
         // Give the server a moment to start.
         await Task.Delay(3000);
@@ -145,15 +151,64 @@ public class AudioClient : MonoBehaviour
         }
     }
 
-    private void OnDestroy() {
-        client?.Close();
+    /// <summary>
+    /// Switches the active microphone by killing the current server process
+    /// and restarting it with the new device name. Safe to call at runtime.
+    /// </summary>
+    public async Task ChangeDeviceAsync(string newDeviceName) {
+        if (string.IsNullOrEmpty(newDeviceName))
+            return;
 
-        if (serverProcess != null && !serverProcess.HasExited) {
-            if (!serverProcess.WaitForExit(1000))
-                serverProcess.Kill();
+        if (newDeviceName == deviceName)
+            return;
 
-            serverProcess.Dispose();
+        if (IsSwitchingDevice) {
+            Debug.LogWarning("AudioClient: device switch already in progress, ignoring request.");
+            return;
         }
+
+        IsSwitchingDevice = true;
+
+        try {
+            deviceName = newDeviceName;
+            await RestartServerConnection();
+        } finally {
+            IsSwitchingDevice = false;
+        }
+    }
+
+    private void CloseServer() {
+        // Stop reading and tear down the current connection/process.
+        try { client?.Close(); } catch (Exception e) { Debug.LogWarning(e); }
+        client = null;
+
+        if (serverProcess != null) {
+            try {
+                if (!serverProcess.HasExited) {
+                    if (!serverProcess.WaitForExit(1000))
+                        serverProcess.Kill();
+                }
+            } catch (Exception e) {
+                Debug.LogWarning(e);
+            } finally {
+                serverProcess.Dispose();
+                serverProcess = null;
+            }
+        }
+
+    }
+
+    private async Task RestartServerConnection() {
+        CloseServer();
+
+        history.Clear();
+
+        await StartServer();
+        await ConnectToServer();
+    }
+
+    private void OnDestroy() {
+        CloseServer();
     }
 
     private string HistoryAsString => string.Join(" ", history);
@@ -183,8 +238,10 @@ public static class PythonMicFinder
         return -1;
     }
 
-    private static string[] GetDevicesRawList(string pythonExe)
+    public static string[] GetDevicesRawList(string pythonExe = null)
     {
+        if (pythonExe == null) pythonExe = AudioClient.serverPath;
+
         var psi = new ProcessStartInfo
         {
             FileName = pythonExe,
@@ -203,6 +260,6 @@ public static class PythonMicFinder
         if(!string.IsNullOrWhiteSpace(error))
             Debug.LogWarning(error);
 
-        return output.Split('\n');
+        return output.Replace("\r", "").Split('\n');
     }
 }
