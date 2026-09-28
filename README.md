@@ -8,7 +8,7 @@ This repository serves as a portfolio showcase for our university **Fachprojekt*
 
 ## 📄 Project Resources
 
-* 📄 **[Read the Full Project Report (PDF)](Feeling_the_Spell_Report.pdf)** *(Make sure your PDF file name matches this exactly, or update this path)*
+* 📄 **[Read the Full Project Report (PDF)](Feeling_the_Spell.pdf)**
 
 ---
 
