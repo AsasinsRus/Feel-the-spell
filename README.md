@@ -17,7 +17,7 @@ This repository serves as a portfolio showcase for our university **Fachprojekt*
 * **Custom Haptic VR Gloves:** Built using cost-effective materials based on the open-source [LucidGloves by LucidVR](https://github.com/LucidVR/lucidgloves) design, enabling finger tracking and physical force feedback.
 * **Speech-to-Text Pipeline:** A lightweight Python background service using the Vosk model, configured with `PartialResult` buffering to process spoken spell commands with minimal latency.
 * **Advanced Gesture Engine:** Upgraded Unity XR interaction setups supporting sequential gesture combos, directional hand swipes, and complex 3D movement drawn in mid-air.
-* **Dynamic Alchemy Matrix:** An immersive alchemy circle where spell components (Coal, Feather, Battery, Flower) dynamically self-rearrange symmetrically before combining into active spells.
+* **Dynamic Alchemy Circle:** An immersive alchemy circle where spell components (Coal, Feather, Battery, Flower) dynamically self-rearrange symmetrically before combining into active spells.
 * **Heuristic Grasping System:** A custom algorithm built on top of the XR Direct Interactor that evaluates real-time finger curl values and palm thresholds to support natural pinch and power grabbing.
 
 ---
@@ -36,35 +36,49 @@ This repository serves as a portfolio showcase for our university **Fachprojekt*
 ## 🔮 Implemented Spells
 
 1. **Fireball:** Thrown projectile that deals 20 baseline damage and spawns a burning fire zone on the ground dealing 10 damage/second.
-![Fireball](pictures/fireball.png)
-
+<p align="center">
+  <img src="pictures/fireball.png" width="250" alt="Fireball"/>
+</p>
 2. **Green Fireball:** High-damage spell variant created with unique components to benchmark system scaling.
-![Green fireball](pictures/green%20fireball.png)
+<p align="center">
+  <img src="pictures/green%20fireball.png" width="250" alt="Green fireball"/>
+</p>
 
 3. **Fire Arrow:** A complex spell behaving like a physical bow; the fire mass scales up visually as the player draws back and disappears if released prematurely.
-![Fire arrow undrawn](pictures/fire%20arrow%20undrawn.png) ![Fire arrow drawn](pictures/fire%20arrow%20drawn.png)
+<p align="center">
+  <img src="pictures/fire%20arrow%20undrawn.png" width="250" alt="Fire arrow undrawn"/>
+  <img src="pictures/fire%20arrow%20drawn.png" width="250" alt="Fire arrow drawn"/>
+</p>
 
 4. **Lightning Spear:** High-velocity thrown projectile dealing 20 direct damage upon impact.
-![Lightning spear](pictures/lightning%20spear.png)
+<p align="center">
+  <img src="pictures/lightning%20spear.png" width="250" alt="Lightning spear"/>
+</p>
 
 ---
 
 ## 📸 Project Showcase
 
-![Empty alchemy circle](pictures/empty%20alchemy%20spell.png)
-![Alchemy circle with items](pictures/alchemy%20spell%20with%20items.png)
-![Drawing circle](pictures/drawing%20circle.png)
+<p align="center">
+  <img src="pictures/empty%20alchemy%20spell.png" width="250" alt="Empty alchemy circle"/>
+  <img src="pictures/alchemy%20spell%20with%20items.png" width="250" alt="Alchemy circle with items"/>
+  <img src="pictures/drawing%20circle.png" width="250" alt="Drawing circle"/>
+</p>
 *Figure: Dynamic Alchemy Circle implemented in Unity.*
 
-![Inventory openning fist](pictures/inventory%20openning%20fist.png)
-![Inventory openning opened palm](pictures/inventory%20openning%20opened%20palm.png)
-![Put item in an intventory](pictures/put%20item%20in%20an%20intventory.png)
-![Inventory with items](pictures/inventory%20with%20items.png)
+<p align="center">
+  <img src="pictures/inventory%20openning%20fist.png" width="250" alt="Inventory openning fist"/>
+  <img src="pictures/inventory%20openning%20opened%20palm.png" width="250" alt="Inventory openning opened palm"/>
+  <img src="pictures/put%20item%20in%20an%20intventory.png" width="250" alt="Put item in an intventory"/>
+  <img src="pictures/inventory%20with%20items.png" width="250" alt="Inventory with items"/>
+</p>
 *Figure: Inventory implemented in Unity.*
 
-![Glove](pictures/glove.png)
-![Servo](pictures/servo.png)
-![Module](pictures/module.png)
+<p align="center">
+  <img src="pictures/glove.png" width="250" alt="Glove"/>
+  <img src="pictures/servo.png" width="250" alt="Servo"/>
+  <img src="pictures/module.png" width="250" alt="Module"/>
+</p>
 *Figure: Glove Hardware & Tracker Assembly.*
 
 ---
