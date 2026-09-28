@@ -59,30 +59,30 @@ This repository serves as a portfolio showcase for our university **Fachprojekt*
 
 ## 📸 Project Showcase
 
+*Dynamic Alchemy Circle implemented in Unity.*
 <p align="center">
   <img src="pictures/empty%20alchemy%20spell.png" height="250" alt="Empty alchemy circle"/>
   <img src="pictures/alchemy%20spell%20with%20items.png" height="250" alt="Alchemy circle with items"/>
   <img src="pictures/drawing%20circle.png" height="250" alt="Drawing circle"/>
-  *Figure: Dynamic Alchemy Circle implemented in Unity.*
 </p>
 
 ---
 
+*Inventory implemented in Unity.*
 <p align="center">
   <img src="pictures/inventory%20openning%20fist.png" height="250" alt="Inventory openning fist"/>
   <img src="pictures/inventory%20openning%20opened%20palm.png" height="250" alt="Inventory openning opened palm"/>
   <img src="pictures/put%20item%20in%20an%20intventory.png" height="250" alt="Put item in an intventory"/>
   <img src="pictures/inventory%20with%20items.png" height="250" alt="Inventory with items"/>
-  *Figure: Inventory implemented in Unity.*
 </p>
 
 ---
 
+*Glove Hardware & Tracker Assembly.*
 <p align="center">
   <img src="pictures/glove.png" height="250" alt="Glove"/>
   <img src="pictures/servo.png" height="250" alt="Servo"/>
   <img src="pictures/module.png" height="250" alt="Module"/>
-  *Figure: Glove Hardware & Tracker Assembly.*
 </p>
 
 ---
