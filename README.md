@@ -37,22 +37,22 @@ This repository serves as a portfolio showcase for our university **Fachprojekt*
 
 1. **Fireball:** Thrown projectile that deals 20 baseline damage and spawns a burning fire zone on the ground dealing 10 damage/second.
 <p align="center">
-  <img src="pictures/fireball.png" width="250" alt="Fireball"/>
+  <img src="pictures/fireball.png" height="250" alt="Fireball"/>
 </p>
 2. **Green Fireball:** High-damage spell variant created with unique components to benchmark system scaling.
 <p align="center">
-  <img src="pictures/green%20fireball.png" width="250" alt="Green fireball"/>
+  <img src="pictures/green%20fireball.png" height="250" alt="Green fireball"/>
 </p>
 
 3. **Fire Arrow:** A complex spell behaving like a physical bow; the fire mass scales up visually as the player draws back and disappears if released prematurely.
 <p align="center">
-  <img src="pictures/fire%20arrow%20undrawn.png" width="250" alt="Fire arrow undrawn"/>
-  <img src="pictures/fire%20arrow%20drawn.png" width="250" alt="Fire arrow drawn"/>
+  <img src="pictures/fire%20arrow%20undrawn.png" height="250" alt="Fire arrow undrawn"/>
+  <img src="pictures/fire%20arrow%20drawn.png" height="250" alt="Fire arrow drawn"/>
 </p>
 
 4. **Lightning Spear:** High-velocity thrown projectile dealing 20 direct damage upon impact.
 <p align="center">
-  <img src="pictures/lightning%20spear.png" width="250" alt="Lightning spear"/>
+  <img src="pictures/lightning%20spear.png" height="250" alt="Lightning spear"/>
 </p>
 
 ---
@@ -60,24 +60,24 @@ This repository serves as a portfolio showcase for our university **Fachprojekt*
 ## 📸 Project Showcase
 
 <p align="center">
-  <img src="pictures/empty%20alchemy%20spell.png" width="250" alt="Empty alchemy circle"/>
-  <img src="pictures/alchemy%20spell%20with%20items.png" width="250" alt="Alchemy circle with items"/>
-  <img src="pictures/drawing%20circle.png" width="250" alt="Drawing circle"/>
+  <img src="pictures/empty%20alchemy%20spell.png" height="250" alt="Empty alchemy circle"/>
+  <img src="pictures/alchemy%20spell%20with%20items.png" height="250" alt="Alchemy circle with items"/>
+  <img src="pictures/drawing%20circle.png" height="250" alt="Drawing circle"/>
 </p>
 *Figure: Dynamic Alchemy Circle implemented in Unity.*
 
 <p align="center">
-  <img src="pictures/inventory%20openning%20fist.png" width="250" alt="Inventory openning fist"/>
-  <img src="pictures/inventory%20openning%20opened%20palm.png" width="250" alt="Inventory openning opened palm"/>
-  <img src="pictures/put%20item%20in%20an%20intventory.png" width="250" alt="Put item in an intventory"/>
-  <img src="pictures/inventory%20with%20items.png" width="250" alt="Inventory with items"/>
+  <img src="pictures/inventory%20openning%20fist.png" height="250" alt="Inventory openning fist"/>
+  <img src="pictures/inventory%20openning%20opened%20palm.png" height="250" alt="Inventory openning opened palm"/>
+  <img src="pictures/put%20item%20in%20an%20intventory.png" height="250" alt="Put item in an intventory"/>
+  <img src="pictures/inventory%20with%20items.png" height="250" alt="Inventory with items"/>
 </p>
 *Figure: Inventory implemented in Unity.*
 
 <p align="center">
-  <img src="pictures/glove.png" width="250" alt="Glove"/>
-  <img src="pictures/servo.png" width="250" alt="Servo"/>
-  <img src="pictures/module.png" width="250" alt="Module"/>
+  <img src="pictures/glove.png" height="250" alt="Glove"/>
+  <img src="pictures/servo.png" height="250" alt="Servo"/>
+  <img src="pictures/module.png" height="250" alt="Module"/>
 </p>
 *Figure: Glove Hardware & Tracker Assembly.*
 
