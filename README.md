@@ -97,13 +97,13 @@ This project was built as an academic **Fachprojekt** at **Technische Universit√
   * Troubleshed and modified the microcontroller firmware wiring and voltage tracking.
   * Assisted with connecting the physical glove to Unity and performed ongoing hardware repairs.
 
-* **Cedric Greiten**
+* **[@cegredev](https://github.com/cegredev)**
   * Researched speech recognition technologies and created the core speech recognition system.
   * Wrote the backend server and client components in Python.
   * Packaged the server-side script into an executable using PyInstaller for Unity inclusion.
   * Implemented the Unity-side GUI for microphone selection via hotkey and resolved data transfer bugs.
 
-* **Yurii Pashkevych**
+* **[@AsasinsRus](https://github.com/AsasinsRus)**
   * Set up the base development environment and configured the Plastic SCM version control system.
   * Designed and implemented the structural systems in Unity.
   * Programmed the operational demo mechanics: inventory, spell creation, spell casting, and natural grasping heuristics.
