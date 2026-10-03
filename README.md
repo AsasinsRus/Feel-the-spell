@@ -91,7 +91,7 @@ This repository serves as a portfolio showcase for our university **Fachprojekt*
 
 This project was built as an academic **Fachprojekt** at **Technische Universit√§t Dortmund** by a team of four:
 
-* **Maximilian Adolenko**
+* **[@MaxAd1234](https://github.com/MaxAd1234)**
   * Sourced and ordered all necessary components for the haptic glove.
   * 3D-printed, soldered, and assembled the hardware chassis.
   * Troubleshed and modified the microcontroller firmware wiring and voltage tracking.
@@ -112,7 +112,7 @@ This project was built as an academic **Fachprojekt** at **Technische Universit√
   * Handled force feedback integration for the XR Interaction Toolkit and assisted with the speech-to-Unity connection.
   * Co-designed project spells and contributed to physical hardware testing and debugging.
 
-* **Dushan Oravskyi**
+* **[@dushan-developer](https://github.com/dushan-developer)**
   * Researched hand gesture recognition frameworks inside Unity.
   * Evaluated, imported, and updated deprecated Unity Asset Store packages for scene landscapes and spell components.
   * Co-designed and implemented specific spell layouts, visual behaviors, and animations.
